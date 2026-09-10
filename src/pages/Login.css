@@ -1,0 +1,366 @@
+/* =========================
+   LOGIN PAGE
+========================= */
+
+.login-page {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
+  background:
+    radial-gradient(
+      circle at 10% 20%,
+      rgba(37, 99, 235, 0.12),
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at 90% 80%,
+      rgba(99, 102, 241, 0.1),
+      transparent 32%
+    ),
+    #f7f9fc;
+}
+
+/* =========================
+   BACKGROUND SHAPES
+========================= */
+
+.login-background-shape {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(2px);
+}
+
+.login-shape-one {
+  width: 360px;
+  height: 360px;
+  top: -180px;
+  left: -120px;
+  background: rgba(37, 99, 235, 0.08);
+}
+
+.login-shape-two {
+  width: 420px;
+  height: 420px;
+  right: -180px;
+  bottom: -220px;
+  background: rgba(79, 70, 229, 0.08);
+}
+
+/* =========================
+   CONTAINER
+========================= */
+
+.login-container {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 460px;
+}
+
+/* =========================
+   CARD
+========================= */
+
+.login-card {
+  width: 100%;
+  padding: 42px;
+  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(229, 231, 235, 0.9);
+  border-radius: 24px;
+  box-shadow:
+    0 24px 70px rgba(15, 23, 42, 0.08),
+    0 4px 14px rgba(15, 23, 42, 0.04);
+  backdrop-filter: blur(14px);
+  animation: login-card-enter 0.5s ease-out;
+}
+
+@keyframes login-card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =========================
+   LOGO
+========================= */
+
+.login-logo {
+  width: 68px;
+  height: 68px;
+  margin: 0 auto 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+  background: linear-gradient(
+    135deg,
+    #2563eb,
+    #4f46e5
+  );
+  box-shadow:
+    0 10px 24px rgba(37, 99, 235, 0.22);
+}
+
+.login-logo span {
+  color: #ffffff;
+  font-size: 31px;
+  font-weight: 700;
+}
+
+/* =========================
+   HEADING
+========================= */
+
+.login-heading {
+  text-align: center;
+}
+
+.login-eyebrow {
+  display: block;
+  margin-bottom: 8px;
+  color: #2563eb;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.6px;
+}
+
+.login-heading h1 {
+  margin: 0;
+  color: #111827;
+  font-size: 32px;
+  line-height: 1.15;
+  font-weight: 750;
+  letter-spacing: -0.6px;
+}
+
+.login-heading p {
+  max-width: 350px;
+  margin: 13px auto 0;
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+/* =========================
+   FEATURES
+========================= */
+
+.login-features {
+  margin-top: 28px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  border-radius: 14px;
+  background: #f8fafc;
+  border: 1px solid #eef2f7;
+}
+
+.login-feature {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #374151;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.feature-icon {
+  width: 21px;
+  height: 21px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #dcfce7;
+  color: #16a34a;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+/* =========================
+   GOOGLE BUTTON
+========================= */
+
+.google-login-button {
+  width: 100%;
+  height: 52px;
+  margin-top: 22px;
+  padding: 0 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 11px;
+  border: 1px solid #d1d5db;
+  border-radius: 11px;
+  background: #ffffff;
+  color: #1f2937;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(15, 23, 42, 0.04);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.google-login-button:hover:not(:disabled) {
+  background: #fafafa;
+  border-color: #bfc4cc;
+  transform: translateY(-1px);
+  box-shadow:
+    0 6px 16px rgba(15, 23, 42, 0.08);
+}
+
+.google-login-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.google-login-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.google-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.google-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* =========================
+   LOADING
+========================= */
+
+.login-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #dbeafe;
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: login-spin 0.7s linear infinite;
+}
+
+@keyframes login-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =========================
+   ERROR
+========================= */
+
+.login-error {
+  margin-top: 14px;
+  padding: 11px 13px;
+  border: 1px solid #fecaca;
+  border-radius: 9px;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* =========================
+   SECURITY
+========================= */
+
+.login-security {
+  margin: 20px 0 0;
+  color: #9ca3af;
+  font-size: 11px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* =========================
+   FOOTER
+========================= */
+
+.login-footer {
+  margin: 20px 0 0;
+  color: #9ca3af;
+  font-size: 11px;
+  text-align: center;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 520px) {
+  .login-page {
+    padding: 16px;
+  }
+
+  .login-card {
+    padding: 32px 24px;
+    border-radius: 20px;
+  }
+
+  .login-logo {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 20px;
+    border-radius: 17px;
+  }
+
+  .login-logo span {
+    font-size: 27px;
+  }
+
+  .login-heading h1 {
+    font-size: 28px;
+  }
+
+  .login-heading p {
+    font-size: 13px;
+  }
+
+  .login-features {
+    margin-top: 23px;
+    padding: 14px;
+  }
+
+  .google-login-button {
+    height: 50px;
+  }
+}
+
+@media (max-width: 360px) {
+  .login-card {
+    padding: 28px 18px;
+  }
+
+  .login-heading h1 {
+    font-size: 25px;
+  }
+
+  .login-feature {
+    font-size: 12px;
+  }
+}
