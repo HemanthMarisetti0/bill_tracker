@@ -181,6 +181,29 @@
   color: #6b7280;
 }
 
+.dashboard-header-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 10px;
+}
+
+.meter-settings-button {
+  height: 44px;
+  padding: 0 18px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #374151;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.meter-settings-button:hover {
+  background: #f3f4f6;
+}
+
 .add-bill-button {
   flex-shrink: 0;
   height: 44px;
@@ -398,7 +421,12 @@
     line-height: 1.5;
   }
 
-  .add-bill-button {
+  .dashboard-header-actions {
+    flex-direction: column;
+  }
+
+  .add-bill-button,
+  .meter-settings-button {
     width: 100%;
   }
 

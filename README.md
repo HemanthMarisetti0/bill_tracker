@@ -1,75 +1,90 @@
-# React + TypeScript + Vite
+# Bill Tracker
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A web app for tracking household bills and expenses. Sign in with Google, log bills by category, and see what's paid and what's still due.
 
-Currently, two official plugins are available:
+Built with React, TypeScript, Vite and Firebase (Authentication + Cloud Firestore).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Features
 
-## React Compiler
+- Google sign-in
+- Add, edit and delete bills
+- Bill categories: Water, Electricity, Gas, Internet, Rent, Maintenance, Mobile, Food, Travel, Other
+- Meter-based bills (Water, Electricity, Gas) take previous and current readings plus a rate, and work out consumption and amount for you
+- Mark bills as paid or unpaid, with an optional payment date and notes
+- Dashboard totals: number of bills, total amount, paid and unpaid amounts (in ₹)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Getting started
 
-## Expanding the ESLint configuration
+### Prerequisites
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- Node.js 20+
+- [pnpm](https://pnpm.io/)
+- A Firebase project with **Authentication** (Google provider enabled) and **Cloud Firestore**
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Install
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+pnpm install
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+### Configure Firebase
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Create a `.env` file in the project root with your Firebase web app config:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```env
+VITE_FIREBASE_API_KEY=
+VITE_FIREBASE_AUTH_DOMAIN=
+VITE_FIREBASE_PROJECT_ID=
+VITE_FIREBASE_STORAGE_BUCKET=
+VITE_FIREBASE_MESSAGING_SENDER_ID=
+VITE_FIREBASE_APP_ID=
+```
+
+You can find these values in the Firebase console under **Project settings → Your apps**. `.env` is git-ignored, so don't commit it.
+
+### Run
+
+```bash
+pnpm dev
+```
+
+Then open the URL Vite prints (usually http://localhost:5173).
+
+## Scripts
+
+| Command        | What it does                          |
+| -------------- | ------------------------------------- |
+| `pnpm dev`     | Start the dev server with hot reload  |
+| `pnpm build`   | Type-check and build to `dist/`       |
+| `pnpm preview` | Serve the production build locally    |
+| `pnpm lint`    | Run ESLint                            |
+
+## Data model
+
+Bills are stored per user in Firestore at:
 
 ```
+users/{userId}/bills/{billId}
+```
+
+Each bill has a `category`, `billingDate`, `amount` and `status` (`paid` / `unpaid`). The other fields are optional: meter readings, `consumption`, `unit`, `rate`, `paymentDate` and `notes`. See [src/types/bill.ts](src/types/bill.ts) for the full type.
+
+[src/services/migrationService.ts](src/services/migrationService.ts) can copy bills from this per-user path into a shared `households/{householdId}/bills` collection. It never deletes the original bills.
+
+## Project structure
+
+```
+src/
+  components/   BillForm, BillTable, Layout
+  context/      Auth context and provider
+  lib/          Firebase initialisation
+  pages/        Login and Dashboard
+  services/     Auth, bill CRUD, bill calculations, migration
+  types/        Shared TypeScript types
+```
+
+## Adding a bill category
+
+1. Add the new value to `BillCategory` in [src/types/bill.ts](src/types/bill.ts).
+2. Add its label, icon and description to the category config in [src/components/BillForm.tsx](src/components/BillForm.tsx), then add it to the `categories` list there.
+3. Add its display label in [src/components/BillTable.tsx](src/components/BillTable.tsx).

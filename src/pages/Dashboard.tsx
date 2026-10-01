@@ -7,11 +7,16 @@ import { db } from "../lib/firebase";
 
 import { logout } from "../services/authService";
 import { addBill, deleteBill, updateBill } from "../services/billService";
+import {
+  saveMeterSettings,
+  subscribeToMeterSettings,
+} from "../services/meterSettingsService";
 
 import BillForm from "../components/BillForm";
 import BillTable from "../components/BillTable";
+import MeterSettingsDialog from "../components/MeterSettingsDialog";
 
-import type { Bill } from "../types/bill";
+import type { Bill, MeterSettings } from "../types/bill";
 
 import "./Dashboard.css";
 
@@ -31,6 +36,16 @@ export default function Dashboard() {
    * Add and Edit modes.
    */
   const [formKey, setFormKey] = useState(0);
+
+  const [meterSettings, setMeterSettings] = useState<MeterSettings>({});
+
+  const [showMeterSettings, setShowMeterSettings] = useState(false);
+
+  /*
+   * Remounts the settings dialog so it
+   * picks up the latest saved values.
+   */
+  const [meterSettingsKey, setMeterSettingsKey] = useState(0);
 
   /*
    * Listen to the current user's bills
@@ -77,6 +92,37 @@ export default function Dashboard() {
 
     return unsubscribe;
   }, [user]);
+
+  /*
+   * Listen to the current user's
+   * meter settings.
+   *
+   * Firestore path:
+   *
+   * users/{user.uid}/settings/meters
+   */
+  useEffect(() => {
+    if (!user) {
+      return;
+    }
+
+    return subscribeToMeterSettings(user.uid, setMeterSettings);
+  }, [user]);
+
+  function handleOpenMeterSettings() {
+    setMeterSettingsKey((value) => value + 1);
+    setShowMeterSettings(true);
+  }
+
+  async function handleSaveMeterSettings(settings: MeterSettings) {
+    if (!user) {
+      throw new Error("You must be logged in to save meter settings.");
+    }
+
+    await saveMeterSettings(user.uid, settings);
+
+    setShowMeterSettings(false);
+  }
 
   /*
    * Open the form for adding a new bill.
@@ -240,12 +286,21 @@ export default function Dashboard() {
             <p>Track and manage all your household bills in one place.</p>
           </div>
 
-          <button
-            type="button"
-            className="add-bill-button"
-            onClick={handleAddBill}>
-            + Add Bill
-          </button>
+          <div className="dashboard-header-actions">
+            <button
+              type="button"
+              className="meter-settings-button"
+              onClick={handleOpenMeterSettings}>
+              ⚙️ Meter Settings
+            </button>
+
+            <button
+              type="button"
+              className="add-bill-button"
+              onClick={handleAddBill}>
+              + Add Bill
+            </button>
+          </div>
         </section>
 
         <section className="dashboard-stats">
@@ -304,6 +359,16 @@ export default function Dashboard() {
         editingBill={editingBill}
         onClose={handleCloseBillForm}
         onSave={handleSaveBill}
+        meterSettings={meterSettings}
+        onCustomizeMeters={handleOpenMeterSettings}
+      />
+
+      <MeterSettingsDialog
+        key={meterSettingsKey}
+        open={showMeterSettings}
+        settings={meterSettings}
+        onClose={() => setShowMeterSettings(false)}
+        onSave={handleSaveMeterSettings}
       />
     </div>
   );

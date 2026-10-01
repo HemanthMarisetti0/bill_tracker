@@ -2,6 +2,7 @@ import {
   addDoc,
   collection,
   deleteDoc,
+  deleteField,
   doc,
   getDocs,
   orderBy,
@@ -14,6 +15,33 @@ import { db } from "../lib/firebase";
 
 import type { Bill } from "../types/bill";
 
+type BillInput = Omit<Bill, "id" | "createdAt">;
+
+/*
+ * Optional fields that may be missing
+ * from a bill, e.g. paymentDate on an
+ * unpaid bill or readings on a rent bill.
+ */
+const optionalBillFields = [
+  "previousReading",
+  "currentReading",
+  "consumption",
+  "unit",
+  "rate",
+  "paymentDate",
+  "notes",
+] as const;
+
+/*
+ * Firestore rejects undefined values,
+ * so drop them before writing.
+ */
+function withoutUndefined(bill: BillInput) {
+  return Object.fromEntries(
+    Object.entries(bill).filter(([, value]) => value !== undefined),
+  );
+}
+
 function billsCollection(userId: string) {
   return collection(
     db,
@@ -25,12 +53,12 @@ function billsCollection(userId: string) {
 
 export async function addBill(
   userId: string,
-  bill: Omit<Bill, "id" | "createdAt">,
+  bill: BillInput,
 ) {
   return addDoc(
     billsCollection(userId),
     {
-      ...bill,
+      ...withoutUndefined(bill),
       createdAt: serverTimestamp(),
     },
   );
@@ -65,7 +93,7 @@ export async function getBills(
 export async function updateBill(
   userId: string,
   billId: string,
-  bill: Partial<Bill>,
+  bill: BillInput,
 ) {
   const billRef = doc(
     db,
@@ -75,9 +103,24 @@ export async function updateBill(
     billId,
   );
 
+  /*
+   * Remove optional fields the edited
+   * bill no longer has, so stale values
+   * (an old payment date, old readings)
+   * don't stay on the document.
+   */
+  const removedFields = Object.fromEntries(
+    optionalBillFields
+      .filter((field) => bill[field] === undefined)
+      .map((field) => [field, deleteField()]),
+  );
+
   await updateDoc(
     billRef,
-    bill,
+    {
+      ...withoutUndefined(bill),
+      ...removedFields,
+    },
   );
 }
 

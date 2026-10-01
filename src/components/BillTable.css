@@ -1,5 +1,101 @@
 .bill-table-wrapper {
   width: 100%;
+  box-sizing: border-box;
+  padding: 20px 24px 24px;
+}
+
+/* =========================
+   DATE FILTER
+========================= */
+
+.bill-date-filter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.bill-period-tabs {
+  display: inline-flex;
+  padding: 4px;
+  border-radius: 11px;
+  background: #f1f4f9;
+}
+
+.bill-period-tabs button {
+  height: 34px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #5b687c;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.bill-period-tabs button:hover {
+  color: #172033;
+}
+
+.bill-period-tabs button.active {
+  background: #ffffff;
+  color: #2563eb;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
+}
+
+.bill-date-range {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.bill-date-range label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bill-date-range label span {
+  color: #7a8699;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.bill-date-range input {
+  height: 40px;
+  box-sizing: border-box;
+  padding: 0 11px;
+  border: 1px solid #d9e1ec;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #172033;
+  font: inherit;
+  font-size: 13px;
+  outline: none;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.bill-date-range input:focus {
+  border-color: #4f7cff;
+  box-shadow: 0 0 0 3px rgba(79, 124, 255, 0.1);
+}
+
+.bill-date-separator {
+  padding-bottom: 10px;
+  color: #9aa5b5;
+  font-size: 14px;
 }
 
 /* =========================
@@ -11,7 +107,7 @@
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
 }
 
 .bill-search {
@@ -42,9 +138,7 @@
 
 .bill-search input:focus {
   border-color: #4f7cff;
-  box-shadow:
-    0 0 0 3px
-    rgba(79, 124, 255, 0.1);
+  box-shadow: 0 0 0 3px rgba(79, 124, 255, 0.1);
 }
 
 .search-icon {
@@ -78,9 +172,7 @@
 
 .bill-filter-select select:focus {
   border-color: #4f7cff;
-  box-shadow:
-    0 0 0 3px
-    rgba(79, 124, 255, 0.1);
+  box-shadow: 0 0 0 3px rgba(79, 124, 255, 0.1);
 }
 
 .clear-filters-button {
@@ -133,9 +225,7 @@
 .download-bills-button:hover:not(:disabled) {
   background: #0f1728;
   transform: translateY(-1px);
-  box-shadow:
-    0 6px 16px
-    rgba(23, 32, 51, 0.15);
+  box-shadow: 0 6px 16px rgba(23, 32, 51, 0.15);
 }
 
 .download-bills-button:active:not(:disabled) {
@@ -153,35 +243,64 @@
   justify-content: center;
   width: 20px;
   height: 20px;
-  border: 1.5px solid
-    rgba(255, 255, 255, 0.8);
+  border: 1.5px solid rgba(255, 255, 255, 0.8);
   border-radius: 5px;
   font-size: 16px;
   line-height: 1;
 }
 
 /* =========================
-   RESULTS INFO
+   PERIOD SUMMARY
 ========================= */
 
-.bill-results-info {
+.bill-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  margin-bottom: 18px;
+  overflow: hidden;
+  border: 1px solid #e4e9f0;
+  border-radius: 12px;
+  background: #e4e9f0;
+}
+
+.bill-summary-item {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 14px;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 13px 16px;
+  background: #fbfcfe;
+}
+
+.bill-summary-item span {
+  overflow: hidden;
   color: #7a8699;
-  font-size: 13px;
-}
-
-.bill-results-info strong {
-  color: #273449;
-  font-weight: 700;
-}
-
-.download-hint {
-  color: #8b96a7;
   font-size: 12px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bill-summary-item strong {
+  color: #172033;
+  font-size: 18px;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+}
+
+.bill-summary-item strong small {
+  color: #9aa5b5;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.bill-summary-item.paid strong {
+  color: #1d8a50;
+}
+
+.bill-summary-item.unpaid strong {
+  color: #d84b45;
 }
 
 /* =========================
@@ -198,7 +317,7 @@
 
 .bill-table {
   width: 100%;
-  min-width: 760px;
+  min-width: 820px;
   border-collapse: collapse;
 }
 
@@ -207,7 +326,7 @@
 }
 
 .bill-table th {
-  padding: 14px 16px;
+  padding: 13px 18px;
   border-bottom: 1px solid #e4e9f0;
   color: #6c788b;
   font-size: 11px;
@@ -219,7 +338,7 @@
 }
 
 .bill-table td {
-  padding: 15px 16px;
+  padding: 14px 18px;
   border-bottom: 1px solid #edf0f4;
   color: #354154;
   font-size: 14px;
@@ -231,24 +350,134 @@
 }
 
 .bill-table tbody tr {
-  transition:
-    background 0.15s ease;
+  transition: background 0.15s ease;
 }
 
 .bill-table tbody tr:hover {
-  background: #fafbfc;
+  background: #f8faff;
+}
+
+.bill-table .align-right {
+  text-align: right;
+}
+
+.bill-table tfoot td {
+  border-top: 1px solid #e4e9f0;
+  border-bottom: none;
+  background: #f7f9fc;
+  color: #5b687c;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* Category cell */
+
+.bill-category-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.bill-category-cell > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.bill-category-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  background: #f1f4f9;
+  font-size: 18px;
+}
+
+.bill-category-badge.water {
+  background: #e6f4ff;
+}
+
+.bill-category-badge.electricity {
+  background: #fff7db;
+}
+
+.bill-category-badge.gas {
+  background: #ffede3;
+}
+
+.bill-category-badge.internet {
+  background: #eaf0ff;
+}
+
+.bill-category-badge.rent {
+  background: #f1ecff;
+}
+
+.bill-category-badge.maintenance {
+  background: #eef2f6;
+}
+
+.bill-category-badge.mobile {
+  background: #e8f8f3;
+}
+
+.bill-category-badge.food {
+  background: #fff0e6;
+}
+
+.bill-category-badge.travel {
+  background: #e7f7fb;
 }
 
 .category-name {
-  display: inline-flex;
-  align-items: center;
-  font-weight: 600;
+  color: #172033;
+  font-weight: 650;
+}
+
+.bill-notes {
+  max-width: 220px;
+  overflow: hidden;
+  color: #8490a2;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Text helpers */
+
+.bill-date,
+.bill-usage {
+  display: block;
+  white-space: nowrap;
+}
+
+.bill-date {
   color: #273449;
+  font-weight: 550;
+}
+
+.bill-subtext {
+  display: block;
+  margin-top: 2px;
+  color: #8b96a7;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.bill-muted {
+  color: #b3bcc9;
 }
 
 .bill-amount {
   color: #172033 !important;
   font-weight: 700;
+  font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
@@ -259,13 +488,19 @@
 .status {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  min-width: 68px;
-  padding: 5px 9px;
+  gap: 6px;
+  padding: 5px 10px;
   border-radius: 999px;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.04em;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.status::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
 }
 
 .status.paid {
@@ -283,7 +518,7 @@
 ========================= */
 
 .bill-actions {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 7px;
 }
@@ -340,6 +575,10 @@
   border-radius: 14px;
   background: #ffffff;
   text-align: center;
+}
+
+.empty-state {
+  margin: 24px;
 }
 
 .empty-state-icon {
@@ -406,9 +645,40 @@
   .download-bills-button {
     flex: 1;
   }
+
+  .bill-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
+/*
+ * Below 700px the table turns into
+ * a list of cards, one per bill.
+ */
 @media (max-width: 700px) {
+  .bill-table-wrapper {
+    padding: 16px;
+  }
+
+  .bill-date-filter {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .bill-period-tabs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .bill-date-range label {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .bill-date-range input {
+    width: 100%;
+  }
+
   .bill-filters {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -427,19 +697,105 @@
     width: 100%;
   }
 
-  .bill-results-info {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 4px;
+  .bill-summary-item strong {
+    font-size: 16px;
   }
 
   .bill-table-container {
-    border-radius: 10px;
+    overflow: visible;
+    border: none;
+    background: transparent;
   }
 
-  .bill-table th,
+  .bill-table {
+    min-width: 0;
+  }
+
+  .bill-table thead {
+    display: none;
+  }
+
+  .bill-table,
+  .bill-table tbody,
+  .bill-table tfoot,
+  .bill-table tr,
   .bill-table td {
-    padding: 12px;
+    display: block;
+  }
+
+  .bill-table tbody tr {
+    margin-bottom: 12px;
+    padding: 6px 14px;
+    border: 1px solid #e4e9f0;
+    border-radius: 12px;
+    background: #ffffff;
+  }
+
+  .bill-table tbody tr:hover {
+    background: #ffffff;
+  }
+
+  .bill-table td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 0;
+    text-align: right;
+  }
+
+  .bill-table td::before {
+    content: attr(data-label);
+    flex-shrink: 0;
+    color: #8490a2;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .bill-table tbody tr td:last-child {
+    border-bottom: none;
+  }
+
+  /* The bill name heads the card. */
+  .bill-table td[data-label="Bill"] {
+    text-align: left;
+  }
+
+  .bill-table td[data-label="Bill"] > div {
+    text-align: left;
+  }
+
+  .bill-table td[data-label="Bill"]::before {
+    content: none;
+  }
+
+  .bill-table td > div {
+    text-align: right;
+  }
+
+  .bill-notes {
+    max-width: 200px;
+  }
+
+  .bill-table tfoot tr {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: #f7f9fc;
+  }
+
+  .bill-table tfoot td {
+    padding: 0;
+    border: none;
+    background: transparent;
+  }
+
+  .bill-table tfoot td::before,
+  .bill-table tfoot td:empty {
+    display: none;
   }
 }
 

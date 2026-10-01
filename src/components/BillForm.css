@@ -255,6 +255,34 @@
   );
 }
 
+.bill-customize-button {
+  flex-shrink: 0;
+
+  margin-left: auto;
+  padding: 7px 11px;
+
+  border: 1px solid #bfdbfe;
+  border-radius: 9px;
+
+  background: #ffffff;
+  color: #1d4ed8;
+
+  font-size: 12px;
+  font-weight: 650;
+
+  cursor: pointer;
+
+  transition: background 0.15s ease;
+}
+
+.bill-customize-button:hover {
+  background: #dbeafe;
+}
+
+.meter-settings-dialog {
+  max-width: 620px;
+}
+
 .bill-selected-icon {
   width: 34px;
   height: 34px;

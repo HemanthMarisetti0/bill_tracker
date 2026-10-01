@@ -8,6 +8,8 @@ export type BillCategory =
   | "rent"
   | "maintenance"
   | "mobile"
+  | "food"
+  | "travel"
   | "other";
 
 export type BillStatus = "paid" | "unpaid";
@@ -39,3 +41,13 @@ export interface Bill {
 
   createdAt?: Timestamp;
 }
+
+export type MeterCategory = "water" | "electricity" | "gas";
+
+export interface MeterSetting {
+  initialReading?: number;
+
+  rate?: number;
+}
+
+export type MeterSettings = Partial<Record<MeterCategory, MeterSetting>>;

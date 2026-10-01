@@ -16,8 +16,15 @@ import {
   calculateAmount,
   calculateConsumption,
 } from "../services/billCalculator";
+import { getMeterSetting } from "../services/meterSettingsService";
 
-import type { Bill, BillCategory, BillStatus } from "../types/bill";
+import type {
+  Bill,
+  BillCategory,
+  BillStatus,
+  MeterCategory,
+  MeterSettings,
+} from "../types/bill";
 
 import "./BillForm.css";
 
@@ -26,6 +33,8 @@ interface BillFormProps {
   onClose: () => void;
   onSave: (bill: Omit<Bill, "id" | "createdAt">) => Promise<void>;
   editingBill?: Bill | null;
+  meterSettings: MeterSettings;
+  onCustomizeMeters: () => void;
 }
 
 interface CategoryConfig {
@@ -34,7 +43,6 @@ interface CategoryConfig {
   description: string;
   meterBased: boolean;
   unit?: string;
-  defaultRate?: string;
 }
 
 const categoryConfig: Record<BillCategory, CategoryConfig> = {
@@ -44,7 +52,6 @@ const categoryConfig: Record<BillCategory, CategoryConfig> = {
     description: "Track your water meter usage",
     meterBased: true,
     unit: "litre",
-    defaultRate: "0.13",
   },
 
   electricity: {
@@ -53,7 +60,6 @@ const categoryConfig: Record<BillCategory, CategoryConfig> = {
     description: "Track your electricity consumption",
     meterBased: true,
     unit: "kWh",
-    defaultRate: "",
   },
 
   gas: {
@@ -62,7 +68,6 @@ const categoryConfig: Record<BillCategory, CategoryConfig> = {
     description: "Track your gas consumption",
     meterBased: true,
     unit: "unit",
-    defaultRate: "",
   },
 
   internet: {
@@ -93,6 +98,20 @@ const categoryConfig: Record<BillCategory, CategoryConfig> = {
     meterBased: false,
   },
 
+  food: {
+    label: "Food",
+    icon: "🍔",
+    description: "Track food and dining expenses",
+    meterBased: false,
+  },
+
+  travel: {
+    label: "Travel",
+    icon: "✈️",
+    description: "Track travel expenses",
+    meterBased: false,
+  },
+
   other: {
     label: "Other",
     icon: "🧾",
@@ -109,10 +128,16 @@ const categories: BillCategory[] = [
   "rent",
   "maintenance",
   "mobile",
+  "food",
+  "travel",
   "other",
 ];
 
 const meterCategories: BillCategory[] = ["water", "electricity", "gas"];
+
+function isMeterCategory(category: BillCategory): category is MeterCategory {
+  return meterCategories.includes(category);
+}
 
 function getToday(): string {
   return new Date().toISOString().split("T")[0];
@@ -126,20 +151,16 @@ function getInitialBillingDate(editingBill?: Bill | null): string {
   return editingBill?.billingDate ?? getToday();
 }
 
-function getInitialPreviousReading(editingBill?: Bill | null): number {
-  return editingBill?.previousReading ?? 0;
-}
-
 function getInitialCurrentReading(editingBill?: Bill | null): string {
   return editingBill?.currentReading?.toString() ?? "";
 }
 
-function getInitialRate(editingBill?: Bill | null): string {
-  if (editingBill?.rate !== undefined) {
-    return editingBill.rate.toString();
-  }
-
-  return categoryConfig.water.defaultRate ?? "";
+/*
+ * null means "use the rate
+ * from meter settings".
+ */
+function getInitialRate(editingBill?: Bill | null): string | null {
+  return editingBill?.rate?.toString() ?? null;
 }
 
 function getInitialAmount(editingBill?: Bill | null): string {
@@ -167,6 +188,8 @@ export default function BillForm({
   onClose,
   onSave,
   editingBill = null,
+  meterSettings,
+  onCustomizeMeters,
 }: BillFormProps) {
   const { user } = useAuth();
 
@@ -180,15 +203,20 @@ export default function BillForm({
     getInitialBillingDate(editingBill),
   );
 
-  const [previousReading, setPreviousReading] = useState<number>(
-    getInitialPreviousReading(editingBill),
-  );
+  /*
+   * Current reading of the latest bill
+   * for the selected category, or null
+   * if there are no bills yet.
+   */
+  const [latestReading, setLatestReading] = useState<number | null>(null);
 
   const [currentReading, setCurrentReading] = useState<string>(
     getInitialCurrentReading(editingBill),
   );
 
-  const [rate, setRate] = useState<string>(getInitialRate(editingBill));
+  const [rateInput, setRateInput] = useState<string | null>(
+    getInitialRate(editingBill),
+  );
 
   const [amountInput, setAmountInput] = useState<string>(
     getInitialAmount(editingBill),
@@ -213,6 +241,16 @@ export default function BillForm({
   const config = categoryConfig[category];
 
   const isMeterBased = config.meterBased;
+
+  const meterSetting = isMeterCategory(category)
+    ? getMeterSetting(meterSettings, category)
+    : {};
+
+  const previousReading = isEditing
+    ? (editingBill?.previousReading ?? 0)
+    : (latestReading ?? meterSetting.initialReading ?? 0);
+
+  const rate = rateInput ?? meterSetting.rate?.toString() ?? "";
 
   /*
    * Open / close native dialog.
@@ -286,32 +324,16 @@ export default function BillForm({
           (bill) => bill.category === category,
         );
 
-        if (categoryBills.length > 0) {
-          const latestBill = categoryBills[0];
-
-          if (latestBill.currentReading !== undefined) {
-            setPreviousReading(latestBill.currentReading);
-          }
-        } else if (category === "water") {
-          /*
-           * Original starting water
-           * meter reading.
-           */
-          setPreviousReading(944515);
-        } else {
-          setPreviousReading(0);
-        }
+        /*
+         * With no earlier bills, the initial
+         * reading from meter settings is used.
+         */
+        setLatestReading(categoryBills[0]?.currentReading ?? null);
       } catch (error) {
         if (!cancelled) {
           console.error("Failed to load previous reading:", error);
 
-          /*
-           * Keep the original water
-           * starting reading as fallback.
-           */
-          if (category === "water") {
-            setPreviousReading(944515);
-          }
+          setLatestReading(null);
         }
       } finally {
         if (!cancelled) {
@@ -372,14 +394,8 @@ export default function BillForm({
 
     setCurrentReading("");
     setAmountInput("");
-
-    const newConfig = categoryConfig[newCategory];
-
-    setRate(newConfig.defaultRate ?? "");
-
-    if (!newConfig.meterBased) {
-      setPreviousReading(0);
-    }
+    setRateInput(null);
+    setLatestReading(null);
   }
 
   /*
@@ -498,7 +514,13 @@ export default function BillForm({
     } catch (error) {
       console.error("Failed to save bill:", error);
 
-      alert(isEditing ? "Failed to update bill." : "Failed to save bill.");
+      const message = error instanceof Error ? error.message : String(error);
+
+      alert(
+        `${isEditing ? "Failed to update bill." : "Failed to save bill."}
+
+${message}`,
+      );
     } finally {
       setSaving(false);
     }
@@ -578,6 +600,15 @@ export default function BillForm({
               </strong>
 
               <span>{config.description}</span>
+
+              {isMeterBased && (
+                <button
+                  type="button"
+                  className="bill-customize-button"
+                  onClick={onCustomizeMeters}>
+                  ⚙️ Customize readings
+                </button>
+              )}
             </div>
           </section>
 
@@ -656,7 +687,7 @@ export default function BillForm({
                           min="0"
                           step="0.01"
                           value={rate}
-                          onChange={(event) => setRate(event.target.value)}
+                          onChange={(event) => setRateInput(event.target.value)}
                           placeholder="Enter rate"
                           required
                         />
