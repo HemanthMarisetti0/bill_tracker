@@ -170,9 +170,110 @@
 .bill-category-grid {
   display: grid;
 
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(6, 1fr);
 
   gap: 9px;
+}
+
+/* =========================================
+   CATEGORY ACCORDION
+========================================= */
+
+.bill-category-accordion {
+  display: flex;
+  flex-direction: column;
+
+  gap: 8px;
+
+  margin-bottom: 14px;
+}
+
+.bill-category-group {
+  border: 1px solid #e5e7eb;
+  border-radius: 13px;
+
+  background: #ffffff;
+
+  overflow: hidden;
+
+  transition: border-color 0.18s ease;
+}
+
+.bill-category-group.open {
+  border-color: #bfdbfe;
+}
+
+.bill-category-group-header {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 11px 14px;
+
+  border: 0;
+
+  background: transparent;
+  color: #111827;
+
+  font-family: inherit;
+  text-align: left;
+
+  cursor: pointer;
+}
+
+.bill-category-group-header:hover {
+  background: #f8fbff;
+}
+
+.bill-category-group.open .bill-category-group-header {
+  background: #f8fbff;
+  border-bottom: 1px solid #e5edf9;
+}
+
+.bill-category-group-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.bill-category-group-label {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.bill-category-group-selected {
+  padding: 3px 9px;
+
+  border-radius: 999px;
+
+  background: #eff6ff;
+  color: #1d4ed8;
+
+  font-size: 11px;
+  font-weight: 650;
+
+  white-space: nowrap;
+}
+
+.bill-category-group-chevron {
+  margin-left: auto;
+
+  color: #6b7280;
+
+  font-size: 16px;
+  line-height: 1;
+
+  transition: transform 0.18s ease;
+}
+
+.bill-category-group.open .bill-category-group-chevron {
+  transform: rotate(180deg);
+}
+
+.bill-category-group .bill-category-grid {
+  padding: 12px;
 }
 
 .bill-category-card {
@@ -516,6 +617,61 @@
 
 .bill-field-full {
   grid-column: 1 / -1;
+}
+
+
+/* =========================================
+   RECURRING
+========================================= */
+
+.bill-recurring-field {
+  display: flex;
+  align-items: flex-start;
+
+  gap: 11px;
+
+  margin-top: 18px;
+  padding: 13px 15px;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+
+  background: #f9fafb;
+
+  cursor: pointer;
+}
+
+.bill-recurring-field input {
+  width: 17px;
+  height: 17px;
+
+  margin: 1px 0 0;
+
+  flex-shrink: 0;
+
+  accent-color: #2563eb;
+
+  cursor: pointer;
+}
+
+.bill-recurring-field span {
+  display: flex;
+  flex-direction: column;
+
+  gap: 3px;
+}
+
+.bill-recurring-field strong {
+  color: #111827;
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.bill-recurring-field small {
+  color: #6b7280;
+
+  font-size: 11px;
 }
 
 

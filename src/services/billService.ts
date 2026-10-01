@@ -29,7 +29,9 @@ const optionalBillFields = [
   "unit",
   "rate",
   "paymentDate",
+  "dueDate",
   "notes",
+  "recurring",
 ] as const;
 
 /*

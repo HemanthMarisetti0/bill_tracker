@@ -1,0 +1,161 @@
+.month-comparison {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.month-card {
+  min-height: 132px;
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-sizing: border-box;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+}
+
+.month-card-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.month-card-dot {
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+
+.month-card-dot.current {
+  background: #2563eb;
+}
+
+.month-card-dot.previous {
+  background: #94a3b8;
+}
+
+.month-card-value {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 26px;
+  line-height: 1.1;
+  font-weight: 750;
+  color: #111827;
+}
+
+.month-card-skeleton {
+  width: 60%;
+  height: 28px;
+}
+
+.month-card-note {
+  margin-top: auto;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.month-card-badge {
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* Spend so far against last month's total */
+.month-card-meter {
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #eef1f6;
+}
+
+.month-card-meter span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: #3b82f6;
+  transition: width 0.4s ease;
+}
+
+/* =========================
+   SAVINGS STATES
+========================= */
+
+.month-card-savings.saved {
+  border-color: #bfe8cf;
+  background: linear-gradient(135deg, #f1fbf5, #ffffff 70%);
+}
+
+.month-card-savings.saved .month-card-label {
+  color: #1d7a47;
+}
+
+.month-card-savings.saved .month-card-badge {
+  background: #dcf5e6;
+  color: #1d7a47;
+}
+
+.month-card-savings.more {
+  border-color: #f5d0cd;
+  background: linear-gradient(135deg, #fff5f4, #ffffff 70%);
+}
+
+.month-card-savings.more .month-card-label {
+  color: #c0392b;
+}
+
+.month-card-savings.more .month-card-badge {
+  background: #ffe3e0;
+  color: #c0392b;
+}
+
+.month-card-savings.more .month-card-meter span {
+  background: #e0605a;
+}
+
+@media (max-width: 900px) {
+  .month-comparison {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .month-card-savings {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 640px) {
+  .month-comparison {
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .month-card {
+    min-height: 112px;
+    padding: 16px 17px;
+    border-radius: 12px;
+  }
+
+  .month-card-label {
+    font-size: 12px;
+  }
+
+  .month-card-value {
+    font-size: 21px;
+  }
+}
+
+@media (max-width: 400px) {
+  .month-comparison {
+    grid-template-columns: 1fr;
+  }
+}

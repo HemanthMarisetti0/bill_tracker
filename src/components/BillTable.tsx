@@ -1,5 +1,8 @@
 import { useMemo, useState } from "react";
 
+import { categories, categoryConfig } from "../lib/categories";
+import { getToday, isOverdue, toDateString } from "../lib/dates";
+
 import type { Bill, BillCategory, BillStatus } from "../types/bill";
 
 import "./BillTable.css";
@@ -10,50 +13,13 @@ interface BillTableProps {
   onEdit: (bill: Bill) => void;
 }
 
-const categoryLabels: Record<BillCategory, string> = {
-  water: "Water",
-  electricity: "Electricity",
-  gas: "Gas",
-  internet: "Internet",
-  rent: "Rent",
-  maintenance: "Maintenance",
-  mobile: "Mobile",
-  food: "Food",
-  travel: "Travel",
-  other: "Other",
-};
-
-const categoryIcons: Record<BillCategory, string> = {
-  water: "💧",
-  electricity: "⚡",
-  gas: "🔥",
-  internet: "🌐",
-  rent: "🏠",
-  maintenance: "🛠️",
-  mobile: "📱",
-  food: "🍔",
-  travel: "✈️",
-  other: "🧾",
-};
-
 type Period = "this-month" | "last-month" | "all" | "custom";
+
+type StatusFilter = BillStatus | "overdue" | "all";
 
 interface DateRange {
   from: string;
   to: string;
-}
-
-/*
- * Formats a local date as YYYY-MM-DD.
- * toISOString() would shift the day
- * for timezones ahead of UTC.
- */
-function toDateString(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
 }
 
 function getMonthRange(monthOffset = 0): DateRange {
@@ -144,12 +110,14 @@ function downloadBillsAsCsv(bills: Bill[], range: DateRange) {
     "Amount",
     "Status",
     "Payment Date",
+    "Due Date",
+    "Recurring",
     "Notes",
   ];
 
   const rows = bills.map((bill) => [
     bill.billingDate,
-    categoryLabels[bill.category],
+    categoryConfig[bill.category].label,
     bill.previousReading ?? "",
     bill.currentReading ?? "",
     bill.consumption ?? "",
@@ -158,6 +126,8 @@ function downloadBillsAsCsv(bills: Bill[], range: DateRange) {
     Number(bill.amount || 0).toFixed(2),
     bill.status.toUpperCase(),
     bill.paymentDate ?? "",
+    bill.dueDate ?? "",
+    bill.recurring ? "Monthly" : "",
     bill.notes ?? "",
   ]);
 
@@ -193,7 +163,7 @@ export default function BillTable({ bills, onDelete, onEdit }: BillTableProps) {
     "all",
   );
 
-  const [statusFilter, setStatusFilter] = useState<BillStatus | "all">("all");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
 
   const [search, setSearch] = useState("");
 
@@ -203,6 +173,8 @@ export default function BillTable({ bills, onDelete, onEdit }: BillTableProps) {
   const [period, setPeriod] = useState<Period>("this-month");
 
   const [dateRange, setDateRange] = useState<DateRange>(() => getMonthRange());
+
+  const today = getToday();
 
   const filteredBills = useMemo(() => {
     const searchValue = search.trim().toLowerCase();
@@ -220,17 +192,20 @@ export default function BillTable({ bills, onDelete, onEdit }: BillTableProps) {
         categoryFilter === "all" || bill.category === categoryFilter;
 
       const matchesStatus =
-        statusFilter === "all" || bill.status === statusFilter;
+        statusFilter === "all" ||
+        (statusFilter === "overdue"
+          ? isOverdue(bill, today)
+          : bill.status === statusFilter);
 
       const matchesSearch =
         !searchValue ||
-        categoryLabels[bill.category].toLowerCase().includes(searchValue) ||
+        categoryConfig[bill.category].label.toLowerCase().includes(searchValue) ||
         bill.billingDate.toLowerCase().includes(searchValue) ||
         bill.notes?.toLowerCase().includes(searchValue);
 
       return matchesDate && matchesCategory && matchesStatus && matchesSearch;
     });
-  }, [bills, dateRange, categoryFilter, statusFilter, search]);
+  }, [bills, dateRange, categoryFilter, statusFilter, search, today]);
 
   const totals = useMemo(() => {
     let total = 0;
@@ -387,9 +362,9 @@ export default function BillTable({ bills, onDelete, onEdit }: BillTableProps) {
             }>
             <option value="all">All Categories</option>
 
-            {Object.entries(categoryLabels).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
+            {categories.map((category) => (
+              <option key={category} value={category}>
+                {categoryConfig[category].label}
               </option>
             ))}
           </select>
@@ -399,11 +374,12 @@ export default function BillTable({ bills, onDelete, onEdit }: BillTableProps) {
           <select
             value={statusFilter}
             onChange={(event) =>
-              setStatusFilter(event.target.value as BillStatus | "all")
+              setStatusFilter(event.target.value as StatusFilter)
             }>
             <option value="all">All Status</option>
             <option value="paid">Paid</option>
             <option value="unpaid">Unpaid</option>
+            <option value="overdue">Overdue</option>
           </select>
         </div>
 
@@ -499,12 +475,24 @@ export default function BillTable({ bills, onDelete, onEdit }: BillTableProps) {
                   <td data-label="Bill">
                     <div className="bill-category-cell">
                       <span className={`bill-category-badge ${bill.category}`}>
-                        {categoryIcons[bill.category]}
+                        {categoryConfig[bill.category].icon}
                       </span>
 
                       <div>
                         <span className="category-name">
-                          {categoryLabels[bill.category]}
+                          {categoryConfig[bill.category].label}
+
+                          {(bill.recurring || bill.recurringSourceId) && (
+                            <span
+                              className="bill-recurring-tag"
+                              title={
+                                bill.recurring
+                                  ? "Repeats every month"
+                                  : "Added from a monthly bill"
+                              }>
+                              🔁 Monthly
+                            </span>
+                          )}
                         </span>
 
                         {bill.notes && (
@@ -525,6 +513,15 @@ export default function BillTable({ bills, onDelete, onEdit }: BillTableProps) {
                       {bill.status === "paid" && bill.paymentDate && (
                         <span className="bill-subtext">
                           Paid {formatDate(bill.paymentDate)}
+                        </span>
+                      )}
+
+                      {bill.status === "unpaid" && bill.dueDate && (
+                        <span
+                          className={`bill-subtext ${
+                            isOverdue(bill, today) ? "overdue" : ""
+                          }`}>
+                          Due {formatDate(bill.dueDate)}
                         </span>
                       )}
                     </div>
@@ -564,9 +561,13 @@ export default function BillTable({ bills, onDelete, onEdit }: BillTableProps) {
                   </td>
 
                   <td data-label="Status">
-                    <span className={`status ${bill.status}`}>
-                      {bill.status === "paid" ? "Paid" : "Unpaid"}
-                    </span>
+                    {isOverdue(bill, today) ? (
+                      <span className="status overdue">Overdue</span>
+                    ) : (
+                      <span className={`status ${bill.status}`}>
+                        {bill.status === "paid" ? "Paid" : "Unpaid"}
+                      </span>
+                    )}
                   </td>
 
                   <td data-label="Actions" className="align-right">

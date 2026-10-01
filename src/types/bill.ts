@@ -5,11 +5,26 @@ export type BillCategory =
   | "electricity"
   | "gas"
   | "internet"
+  | "mobile"
+  | "dth"
   | "rent"
   | "maintenance"
-  | "mobile"
+  | "emi"
+  | "insurance"
+  | "subscriptions"
+  | "education"
+  | "assets"
+  | "groceries"
+  | "milk"
   | "food"
+  | "medical"
+  | "shopping"
+  | "domestic-help"
+  | "petrol"
+  | "vehicle"
   | "travel"
+  | "pooja"
+  | "gifts"
   | "other";
 
 export type BillStatus = "paid" | "unpaid";
@@ -37,7 +52,28 @@ export interface Bill {
 
   paymentDate?: string;
 
+  dueDate?: string;
+
   notes?: string;
+
+  /*
+   * A recurring bill is the template for
+   * an unpaid copy added every month.
+   */
+  recurring?: boolean;
+
+  /*
+   * Last month (YYYY-MM) copies were
+   * created for, so deleted copies
+   * aren't created again.
+   */
+  recurringGeneratedThrough?: string;
+
+  /*
+   * Set on copies: the id of the
+   * recurring bill they came from.
+   */
+  recurringSourceId?: string;
 
   createdAt?: Timestamp;
 }
@@ -51,3 +87,8 @@ export interface MeterSetting {
 }
 
 export type MeterSettings = Partial<Record<MeterCategory, MeterSetting>>;
+
+/*
+ * Monthly spending limit per category, in ₹.
+ */
+export type Budgets = Partial<Record<BillCategory, number>>;

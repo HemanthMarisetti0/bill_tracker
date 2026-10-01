@@ -1,0 +1,226 @@
+.loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  text-align: center;
+}
+
+.loader-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 50% 38%, #e8f1ff 0, transparent 55%),
+    #f6f8fb;
+  animation: loader-fade-in 0.3s ease both;
+}
+
+.loader-section {
+  min-height: 260px;
+  padding: 32px 16px;
+}
+
+/* =========================
+   MARK
+========================= */
+
+.loader-mark {
+  position: relative;
+  width: 84px;
+  height: 84px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loader-section .loader-mark {
+  width: 64px;
+  height: 64px;
+}
+
+.loader-icon {
+  position: relative;
+  z-index: 1;
+  width: 58%;
+  height: 58%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow:
+    0 6px 18px rgba(37, 99, 235, 0.18),
+    0 1px 3px rgba(15, 23, 42, 0.08);
+  font-size: 24px;
+  animation: loader-bob 1.6s ease-in-out infinite;
+}
+
+.loader-section .loader-icon {
+  border-radius: 12px;
+  font-size: 18px;
+}
+
+/* Soft pulsing rings */
+.loader-ring {
+  position: absolute;
+  inset: 8%;
+  border-radius: 50%;
+  background: rgba(59, 130, 246, 0.16);
+  animation: loader-pulse 1.8s ease-out infinite;
+}
+
+.loader-ring-delayed {
+  animation-delay: 0.9s;
+}
+
+/* Dot circling the icon */
+.loader-orbit {
+  position: absolute;
+  inset: 0;
+  border: 2px solid rgba(37, 99, 235, 0.12);
+  border-radius: 50%;
+  animation: loader-spin 1.4s linear infinite;
+}
+
+.loader-dot {
+  position: absolute;
+  top: -5px;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  margin-left: -4px;
+  border-radius: 50%;
+  background: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+}
+
+/* =========================
+   TEXT
+========================= */
+
+.loader-title {
+  margin-top: 6px;
+  font-size: 20px;
+  font-weight: 750;
+  color: #111827;
+}
+
+.loader-message {
+  margin: 0;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.loader-title + .loader-message {
+  margin-top: -8px;
+}
+
+/* Indeterminate bar */
+.loader-progress {
+  position: relative;
+  width: 140px;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e5edf9;
+}
+
+.loader-section .loader-progress {
+  width: 110px;
+}
+
+.loader-progress span {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 40%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #60a5fa, #2563eb);
+  animation: loader-slide 1.3s ease-in-out infinite;
+}
+
+/* =========================
+   SKELETON
+========================= */
+
+.skeleton {
+  display: inline-block;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #eef1f6 25%, #f7f9fc 50%, #eef1f6 75%);
+  background-size: 200% 100%;
+  animation: loader-shimmer 1.4s ease-in-out infinite;
+}
+
+/* =========================
+   ANIMATIONS
+========================= */
+
+@keyframes loader-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes loader-pulse {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.9;
+  }
+
+  100% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+}
+
+@keyframes loader-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes loader-slide {
+  0% {
+    left: -40%;
+  }
+
+  100% {
+    left: 100%;
+  }
+}
+
+@keyframes loader-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+@keyframes loader-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loader-ring,
+  .loader-orbit,
+  .loader-icon,
+  .loader-progress span,
+  .skeleton {
+    animation-duration: 3s;
+  }
+
+  .loader-ring,
+  .loader-icon {
+    animation: none;
+  }
+}

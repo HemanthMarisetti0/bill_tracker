@@ -17,12 +17,19 @@ import {
   calculateConsumption,
 } from "../services/billCalculator";
 import { getMeterSetting } from "../services/meterSettingsService";
+import {
+  categoryConfig,
+  categoryGroups,
+  getCategoryGroup,
+  isMeterCategory,
+  meterCategories,
+} from "../lib/categories";
+import { getToday } from "../lib/dates";
 
 import type {
   Bill,
   BillCategory,
   BillStatus,
-  MeterCategory,
   MeterSettings,
 } from "../types/bill";
 
@@ -35,112 +42,6 @@ interface BillFormProps {
   editingBill?: Bill | null;
   meterSettings: MeterSettings;
   onCustomizeMeters: () => void;
-}
-
-interface CategoryConfig {
-  label: string;
-  icon: string;
-  description: string;
-  meterBased: boolean;
-  unit?: string;
-}
-
-const categoryConfig: Record<BillCategory, CategoryConfig> = {
-  water: {
-    label: "Water",
-    icon: "💧",
-    description: "Track your water meter usage",
-    meterBased: true,
-    unit: "litre",
-  },
-
-  electricity: {
-    label: "Electricity",
-    icon: "⚡",
-    description: "Track your electricity consumption",
-    meterBased: true,
-    unit: "kWh",
-  },
-
-  gas: {
-    label: "Gas",
-    icon: "🔥",
-    description: "Track your gas consumption",
-    meterBased: true,
-    unit: "unit",
-  },
-
-  internet: {
-    label: "Internet",
-    icon: "🌐",
-    description: "Track your internet bill",
-    meterBased: false,
-  },
-
-  rent: {
-    label: "Rent",
-    icon: "🏠",
-    description: "Track your monthly rent",
-    meterBased: false,
-  },
-
-  maintenance: {
-    label: "Maintenance",
-    icon: "🛠️",
-    description: "Track maintenance charges",
-    meterBased: false,
-  },
-
-  mobile: {
-    label: "Mobile",
-    icon: "📱",
-    description: "Track your mobile bill",
-    meterBased: false,
-  },
-
-  food: {
-    label: "Food",
-    icon: "🍔",
-    description: "Track food and dining expenses",
-    meterBased: false,
-  },
-
-  travel: {
-    label: "Travel",
-    icon: "✈️",
-    description: "Track travel expenses",
-    meterBased: false,
-  },
-
-  other: {
-    label: "Other",
-    icon: "🧾",
-    description: "Track any other bill",
-    meterBased: false,
-  },
-};
-
-const categories: BillCategory[] = [
-  "water",
-  "electricity",
-  "gas",
-  "internet",
-  "rent",
-  "maintenance",
-  "mobile",
-  "food",
-  "travel",
-  "other",
-];
-
-const meterCategories: BillCategory[] = ["water", "electricity", "gas"];
-
-function isMeterCategory(category: BillCategory): category is MeterCategory {
-  return meterCategories.includes(category);
-}
-
-function getToday(): string {
-  return new Date().toISOString().split("T")[0];
 }
 
 function getInitialCategory(editingBill?: Bill | null): BillCategory {
@@ -183,6 +84,14 @@ function getInitialNotes(editingBill?: Bill | null): string {
   return editingBill?.notes ?? "";
 }
 
+function getInitialDueDate(editingBill?: Bill | null): string {
+  return editingBill?.dueDate ?? "";
+}
+
+function getInitialRecurring(editingBill?: Bill | null): boolean {
+  return editingBill?.recurring ?? false;
+}
+
 export default function BillForm({
   open,
   onClose,
@@ -197,6 +106,14 @@ export default function BillForm({
 
   const [category, setCategory] = useState<BillCategory>(
     getInitialCategory(editingBill),
+  );
+
+  /*
+   * Category group expanded in the picker.
+   * Starts on the selected category's group.
+   */
+  const [openGroup, setOpenGroup] = useState<string | null>(
+    () => getCategoryGroup(getInitialCategory(editingBill)).label,
   );
 
   const [billingDate, setBillingDate] = useState<string>(
@@ -232,6 +149,14 @@ export default function BillForm({
 
   const [notes, setNotes] = useState<string>(getInitialNotes(editingBill));
 
+  const [dueDate, setDueDate] = useState<string>(
+    getInitialDueDate(editingBill),
+  );
+
+  const [recurring, setRecurring] = useState<boolean>(
+    getInitialRecurring(editingBill),
+  );
+
   const [saving, setSaving] = useState(false);
 
   const [loadingPreviousReading, setLoadingPreviousReading] = useState(false);
@@ -241,6 +166,13 @@ export default function BillForm({
   const config = categoryConfig[category];
 
   const isMeterBased = config.meterBased;
+
+  /*
+   * Meter bills need a new reading each
+   * month, and a copy made from a recurring
+   * bill can't start its own series.
+   */
+  const canRecur = !isMeterBased && !editingBill?.recurringSourceId;
 
   const meterSetting = isMeterCategory(category)
     ? getMeterSetting(meterSettings, category)
@@ -495,7 +427,11 @@ export default function BillForm({
 
         paymentDate: status === "paid" ? paymentDate : undefined,
 
+        dueDate: dueDate || undefined,
+
         notes: notes.trim(),
+
+        recurring: canRecur && recurring ? true : undefined,
       };
 
       /*
@@ -570,26 +506,71 @@ ${message}`,
           <section className="bill-category-section">
             <div className="bill-form-section-title">Bill Category</div>
 
-            <div className="bill-category-grid">
-              {categories.map((item) => {
-                const itemConfig = categoryConfig[item];
+            <div className="bill-category-accordion">
+              {categoryGroups.map((group) => {
+                const isOpen = openGroup === group.label;
+
+                const hasSelected = group.categories.includes(category);
+
+                const panelId = `bill-category-group-${group.label
+                  .toLowerCase()
+                  .replace(/[^a-z]+/g, "-")}`;
 
                 return (
-                  <button
-                    key={item}
-                    type="button"
-                    className={`bill-category-card ${
-                      category === item ? "selected" : ""
-                    }`}
-                    onClick={() => handleCategoryChange(item)}>
-                    <span className="bill-category-icon">
-                      {itemConfig.icon}
-                    </span>
+                  <div
+                    key={group.label}
+                    className={`bill-category-group ${isOpen ? "open" : ""}`}>
+                    <button
+                      type="button"
+                      className="bill-category-group-header"
+                      aria-expanded={isOpen}
+                      aria-controls={panelId}
+                      onClick={() =>
+                        setOpenGroup(isOpen ? null : group.label)
+                      }>
+                      <span className="bill-category-group-icon">
+                        {group.icon}
+                      </span>
 
-                    <span className="bill-category-name">
-                      {itemConfig.label}
-                    </span>
-                  </button>
+                      <span className="bill-category-group-label">
+                        {group.label}
+                      </span>
+
+                      {hasSelected && !isOpen && (
+                        <span className="bill-category-group-selected">
+                          {config.icon} {config.label}
+                        </span>
+                      )}
+
+                      <span className="bill-category-group-chevron">⌄</span>
+                    </button>
+
+                    {isOpen && (
+                      <div id={panelId} className="bill-category-grid">
+                        {group.categories.map((item) => {
+                          const itemConfig = categoryConfig[item];
+
+                          return (
+                            <button
+                              key={item}
+                              type="button"
+                              className={`bill-category-card ${
+                                category === item ? "selected" : ""
+                              }`}
+                              onClick={() => handleCategoryChange(item)}>
+                              <span className="bill-category-icon">
+                                {itemConfig.icon}
+                              </span>
+
+                              <span className="bill-category-name">
+                                {itemConfig.label}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
                 );
               })}
             </div>
@@ -795,7 +776,38 @@ ${message}`,
                     />
                   </label>
                 )}
+
+                <label className="bill-field">
+                  <span>Due Date (optional)</span>
+
+                  <input
+                    type="date"
+                    value={dueDate}
+                    onChange={(event) => setDueDate(event.target.value)}
+                  />
+
+                  <small>Unpaid bills past this date are marked overdue.</small>
+                </label>
               </div>
+
+              {canRecur && (
+                <label className="bill-recurring-field">
+                  <input
+                    type="checkbox"
+                    checked={recurring}
+                    onChange={(event) => setRecurring(event.target.checked)}
+                  />
+
+                  <span>
+                    <strong>🔁 Repeat every month</strong>
+
+                    <small>
+                      An unpaid copy of this bill is added at the start of each
+                      month. Untick to stop.
+                    </small>
+                  </span>
+                </label>
+              )}
             </section>
 
             {/* =================================

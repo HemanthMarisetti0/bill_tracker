@@ -434,6 +434,66 @@
   background: #e7f7fb;
 }
 
+.bill-category-badge.petrol {
+  background: #eef0f4;
+}
+
+.bill-category-badge.pooja {
+  background: #fff7d6;
+}
+
+.bill-category-badge.dth {
+  background: #ecebff;
+}
+
+.bill-category-badge.emi {
+  background: #e9f1ff;
+}
+
+.bill-category-badge.insurance {
+  background: #e6f6ee;
+}
+
+.bill-category-badge.subscriptions {
+  background: #fdeaf3;
+}
+
+.bill-category-badge.education {
+  background: #eef4ff;
+}
+
+.bill-category-badge.assets {
+  background: #eef6ff;
+}
+
+.bill-category-badge.groceries {
+  background: #eaf7e6;
+}
+
+.bill-category-badge.milk {
+  background: #f2f6fa;
+}
+
+.bill-category-badge.medical {
+  background: #ffecee;
+}
+
+.bill-category-badge.shopping {
+  background: #fceefb;
+}
+
+.bill-category-badge.domestic-help {
+  background: #eef7f5;
+}
+
+.bill-category-badge.vehicle {
+  background: #eef1f5;
+}
+
+.bill-category-badge.gifts {
+  background: #fff0f3;
+}
+
 .category-name {
   color: #172033;
   font-weight: 650;
@@ -511,6 +571,29 @@
 .status.unpaid {
   background: #fff0ef;
   color: #d84b45;
+}
+
+.status.overdue {
+  background: #d84b45;
+  color: #ffffff;
+}
+
+.bill-subtext.overdue {
+  color: #d84b45;
+  font-weight: 650;
+}
+
+.bill-recurring-tag {
+  display: inline-block;
+  margin-left: 7px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: #eef4ff;
+  color: #2563eb;
+  font-size: 10px;
+  font-weight: 700;
+  vertical-align: 1px;
+  white-space: nowrap;
 }
 
 /* =========================
