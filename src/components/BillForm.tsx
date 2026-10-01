@@ -64,8 +64,24 @@ function getInitialRate(editingBill?: Bill | null): string | null {
   return editingBill?.rate?.toString() ?? null;
 }
 
+/*
+ * A meter bill saved without readings
+ * was entered as a direct amount.
+ */
+function getInitialNoReading(editingBill?: Bill | null): boolean {
+  return Boolean(
+    editingBill &&
+      meterCategories.includes(editingBill.category) &&
+      editingBill.currentReading === undefined,
+  );
+}
+
 function getInitialAmount(editingBill?: Bill | null): string {
-  if (!editingBill || meterCategories.includes(editingBill.category)) {
+  if (
+    !editingBill ||
+    (meterCategories.includes(editingBill.category) &&
+      !getInitialNoReading(editingBill))
+  ) {
     return "";
   }
 
@@ -131,6 +147,10 @@ export default function BillForm({
     getInitialCurrentReading(editingBill),
   );
 
+  const [noReading, setNoReading] = useState<boolean>(
+    getInitialNoReading(editingBill),
+  );
+
   const [rateInput, setRateInput] = useState<string | null>(
     getInitialRate(editingBill),
   );
@@ -166,6 +186,12 @@ export default function BillForm({
   const config = categoryConfig[category];
 
   const isMeterBased = config.meterBased;
+
+  /*
+   * Meter bills can skip readings and
+   * take the amount directly.
+   */
+  const usesReadings = isMeterBased && !noReading;
 
   /*
    * Meter bills need a new reading each
@@ -212,7 +238,7 @@ export default function BillForm({
    * users/{user.uid}/bills
    */
   useEffect(() => {
-    if (!open || !user || !isMeterBased || isEditing) {
+    if (!open || !user || !usesReadings || isEditing) {
       return;
     }
 
@@ -260,7 +286,10 @@ export default function BillForm({
          * With no earlier bills, the initial
          * reading from meter settings is used.
          */
-        setLatestReading(categoryBills[0]?.currentReading ?? null);
+        setLatestReading(
+          categoryBills.find((bill) => bill.currentReading !== undefined)
+            ?.currentReading ?? null,
+        );
       } catch (error) {
         if (!cancelled) {
           console.error("Failed to load previous reading:", error);
@@ -279,13 +308,13 @@ export default function BillForm({
     return () => {
       cancelled = true;
     };
-  }, [open, user, category, isMeterBased, isEditing]);
+  }, [open, user, category, usesReadings, isEditing]);
 
   /*
    * Consumption calculation.
    */
   const consumption = useMemo(() => {
-    if (!isMeterBased) {
+    if (!usesReadings) {
       return 0;
     }
 
@@ -296,14 +325,14 @@ export default function BillForm({
     }
 
     return calculateConsumption(previousReading, current);
-  }, [currentReading, previousReading, isMeterBased]);
+  }, [currentReading, previousReading, usesReadings]);
 
   /*
    * Amount calculation for
    * meter-based bills.
    */
   const calculatedAmount = useMemo(() => {
-    if (!isMeterBased) {
+    if (!usesReadings) {
       return 0;
     }
 
@@ -314,9 +343,9 @@ export default function BillForm({
     }
 
     return calculateAmount(consumption, rateValue);
-  }, [consumption, rate, isMeterBased]);
+  }, [consumption, rate, usesReadings]);
 
-  const finalAmount = isMeterBased ? calculatedAmount : Number(amountInput);
+  const finalAmount = usesReadings ? calculatedAmount : Number(amountInput);
 
   /*
    * Category change.
@@ -360,7 +389,7 @@ export default function BillForm({
     /*
      * Meter validation.
      */
-    if (isMeterBased) {
+    if (usesReadings) {
       const current = Number(currentReading);
 
       const rateValue = Number(rate);
@@ -387,7 +416,7 @@ export default function BillForm({
     /*
      * Direct amount validation.
      */
-    if (!isMeterBased) {
+    if (!usesReadings) {
       if (!Number.isFinite(finalAmount) || finalAmount < 0) {
         alert("Please enter a valid bill amount.");
 
@@ -411,7 +440,7 @@ export default function BillForm({
         category,
         billingDate,
 
-        ...(isMeterBased
+        ...(usesReadings
           ? {
               previousReading,
               currentReading: Number(currentReading),
@@ -582,7 +611,7 @@ ${message}`,
 
               <span>{config.description}</span>
 
-              {isMeterBased && (
+              {usesReadings && (
                 <button
                   type="button"
                   className="bill-customize-button"
@@ -616,7 +645,7 @@ ${message}`,
                   />
                 </label>
 
-                {isMeterBased ? (
+                {usesReadings ? (
                   <>
                     {/* Previous reading */}
                     <label className="bill-field">
@@ -699,12 +728,30 @@ ${message}`,
                   </label>
                 )}
               </div>
+
+              {isMeterBased && (
+                <label className="bill-recurring-field">
+                  <input
+                    type="checkbox"
+                    checked={noReading}
+                    onChange={(event) => setNoReading(event.target.checked)}
+                  />
+
+                  <span>
+                    <strong>No reading</strong>
+
+                    <small>
+                      Enter the bill amount directly instead of meter readings.
+                    </small>
+                  </span>
+                </label>
+              )}
             </section>
 
             {/* =================================
                 CALCULATION
             ================================== */}
-            {isMeterBased && (
+            {usesReadings && (
               <section className="bill-calculation">
                 <div className="bill-form-section-title">Calculation</div>
 
