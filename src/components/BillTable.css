@@ -482,6 +482,18 @@
   background: #fff4e0;
 }
 
+.bill-category-badge.fruits {
+  background: #fdecea;
+}
+
+.bill-category-badge.vegetables {
+  background: #e9f7ec;
+}
+
+.bill-category-badge.grooming {
+  background: #fbeef6;
+}
+
 .bill-category-badge.medical {
   background: #ffecee;
 }
@@ -496,6 +508,50 @@
 
 .bill-category-badge.vehicle {
   background: #eef1f5;
+}
+
+.bill-category-badge.credit-card {
+  background: #eceefb;
+}
+
+.bill-category-badge.investments {
+  background: #e6f6ef;
+}
+
+.bill-category-badge.taxes {
+  background: #f1f1f1;
+}
+
+.bill-category-badge.donations {
+  background: #fff6e5;
+}
+
+.bill-category-badge.meat-fish {
+  background: #fdeceb;
+}
+
+.bill-category-badge.bakery {
+  background: #fbf1e3;
+}
+
+.bill-category-badge.laundry {
+  background: #e9f3fb;
+}
+
+.bill-category-badge.gym {
+  background: #eaf6f0;
+}
+
+.bill-category-badge.pets {
+  background: #f6efe6;
+}
+
+.bill-category-badge.kids {
+  background: #fff0f5;
+}
+
+.bill-category-badge.parking-tolls {
+  background: #eef2f7;
 }
 
 .bill-category-badge.gifts {

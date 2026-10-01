@@ -96,6 +96,34 @@ export const categoryConfig: Record<BillCategory, CategoryConfig> = {
     meterBased: false,
   },
 
+  "credit-card": {
+    label: "Credit Card Bill",
+    icon: "💳",
+    description: "Track monthly credit card bill payments",
+    meterBased: false,
+  },
+
+  investments: {
+    label: "Investments / SIP",
+    icon: "📈",
+    description: "Track mutual fund SIPs, RD, PPF and other investments",
+    meterBased: false,
+  },
+
+  taxes: {
+    label: "Taxes",
+    icon: "🏛️",
+    description: "Track property tax, income tax and other tax payments",
+    meterBased: false,
+  },
+
+  donations: {
+    label: "Donations / Charity",
+    icon: "🤲",
+    description: "Track donations and charity contributions",
+    meterBased: false,
+  },
+
   assets: {
     label: "Assets",
     icon: "💎",
@@ -108,6 +136,20 @@ export const categoryConfig: Record<BillCategory, CategoryConfig> = {
     label: "Groceries",
     icon: "🛒",
     description: "Track groceries and household supplies",
+    meterBased: false,
+  },
+
+  "meat-fish": {
+    label: "Meat, Fish & Eggs",
+    icon: "🍗",
+    description: "Track chicken, mutton, fish and egg purchases",
+    meterBased: false,
+  },
+
+  bakery: {
+    label: "Bakery & Snacks",
+    icon: "🥐",
+    description: "Track bread, biscuits, sweets and snacks",
     meterBased: false,
   },
 
@@ -132,6 +174,20 @@ export const categoryConfig: Record<BillCategory, CategoryConfig> = {
     meterBased: false,
   },
 
+  fruits: {
+    label: "Fruits",
+    icon: "🍎",
+    description: "Track fresh fruits and dry fruits purchases",
+    meterBased: false,
+  },
+
+  vegetables: {
+    label: "Vegetables",
+    icon: "🥦",
+    description: "Track vegetables, greens and herbs purchases",
+    meterBased: false,
+  },
+
   food: {
     label: "Food",
     icon: "🍔",
@@ -153,10 +209,46 @@ export const categoryConfig: Record<BillCategory, CategoryConfig> = {
     meterBased: false,
   },
 
+  grooming: {
+    label: "Grooming & Personal Care",
+    icon: "💇",
+    description:
+      "Track haircuts, shaving, salon visits, skincare and toiletries",
+    meterBased: false,
+  },
+
   "domestic-help": {
     label: "Domestic Help",
     icon: "🧹",
     description: "Track maid, cook or driver salary",
+    meterBased: false,
+  },
+
+  laundry: {
+    label: "Laundry & Ironing",
+    icon: "👕",
+    description: "Track laundry, ironing and dry cleaning charges",
+    meterBased: false,
+  },
+
+  gym: {
+    label: "Gym & Fitness",
+    icon: "🏋️",
+    description: "Track gym, yoga and sports memberships",
+    meterBased: false,
+  },
+
+  pets: {
+    label: "Pets",
+    icon: "🐾",
+    description: "Track pet food, vet visits and pet grooming",
+    meterBased: false,
+  },
+
+  kids: {
+    label: "Kids & Baby Care",
+    icon: "🧸",
+    description: "Track diapers, baby food, toys and kids' supplies",
     meterBased: false,
   },
   movies: {
@@ -176,6 +268,13 @@ export const categoryConfig: Record<BillCategory, CategoryConfig> = {
     label: "Vehicle Service",
     icon: "🔧",
     description: "Track vehicle servicing and repairs",
+    meterBased: false,
+  },
+
+  "parking-tolls": {
+    label: "Parking & Tolls",
+    icon: "🅿️",
+    description: "Track FASTag recharges, tolls and parking fees",
     meterBased: false,
   },
 
@@ -230,7 +329,11 @@ export const categoryGroups: CategoryGroup[] = [
       "insurance",
       "subscriptions",
       "education",
+      "credit-card",
+      "investments",
+      "taxes",
       "assets",
+      "donations",
     ],
   },
   {
@@ -238,14 +341,25 @@ export const categoryGroups: CategoryGroup[] = [
     icon: "🛒",
     categories: [
       "groceries",
+      "meat-fish",
+      "bakery",
       "milk",
       "drinking-water",
       "juice",
+      "fruits",
+      "vegetables",
       "food",
       "medical",
       "shopping",
+      "grooming",
       "domestic-help",
+      "laundry",
     ],
+  },
+  {
+    label: "Health & Lifestyle",
+    icon: "🌿",
+    categories: ["gym", "pets", "kids"],
   },
   {
     label: "Travel & Others",
@@ -254,6 +368,7 @@ export const categoryGroups: CategoryGroup[] = [
       "movies",
       "petrol",
       "vehicle",
+      "parking-tolls",
       "travel",
       "pooja",
       "gifts",
