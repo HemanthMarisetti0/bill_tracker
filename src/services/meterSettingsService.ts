@@ -1,6 +1,6 @@
 import { doc, onSnapshot, setDoc } from "firebase/firestore";
 
-import { db } from "../lib/firebase";
+import { db } from "../lib/firestore";
 
 import type { MeterCategory, MeterSetting, MeterSettings } from "../types/bill";
 

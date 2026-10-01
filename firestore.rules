@@ -3,6 +3,14 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    function isValidProfile(data) {
+      return data.keys().hasOnly(["preferredName"])
+        && (!("preferredName" in data)
+          || (data.preferredName is string
+            && data.preferredName.size() > 0
+            && data.preferredName.size() <= 30));
+    }
+
     // User profile
     match /users/{userId} {
 
@@ -35,8 +43,13 @@ service cloud.firestore {
       match /settings/{settingId} {
 
         // Only the logged-in user can access their own settings
-        allow read, write: if request.auth != null
+        allow read, delete: if request.auth != null
           && request.auth.uid == userId;
+
+        // The profile only holds a short preferred name
+        allow create, update: if request.auth != null
+          && request.auth.uid == userId
+          && (settingId != "profile" || isValidProfile(request.resource.data));
       }
     }
   }

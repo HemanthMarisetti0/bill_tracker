@@ -13,13 +13,13 @@
   border: 0;
   border-radius: 22px;
 
-  background: #ffffff;
+  background: var(--surface);
 
-  color: #111827;
+  color: var(--text);
 
   box-shadow:
-    0 25px 50px -12px rgba(0, 0, 0, 0.25),
-    0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    0 25px 50px -12px light-dark(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.50)),
+    0 10px 25px -5px light-dark(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.25));
 
   overflow: hidden;
 }
@@ -50,7 +50,7 @@
 }
 
 .bill-dialog-content::-webkit-scrollbar-thumb {
-  background: #d1d5db;
+  background: light-dark(#d1d5db, #333841);
   border-radius: 20px;
 }
 
@@ -88,7 +88,7 @@
 
   border-radius: 15px;
 
-  background: #eff6ff;
+  background: light-dark(#eff6ff, #132439);
 
   font-size: 27px;
 }
@@ -96,7 +96,7 @@
 .bill-dialog-header h2 {
   margin: 0 0 5px;
 
-  color: #111827;
+  color: var(--text);
 
   font-size: 24px;
   font-weight: 750;
@@ -106,7 +106,7 @@
 .bill-dialog-header p {
   margin: 0;
 
-  color: #6b7280;
+  color: var(--text-muted);
 
   font-size: 13px;
   line-height: 1.5;
@@ -124,11 +124,11 @@
 
   padding: 0;
 
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   border-radius: 10px;
 
-  background: #f9fafb;
-  color: #6b7280;
+  background: var(--surface-subtle);
+  color: var(--text-muted);
 
   font-size: 25px;
   line-height: 1;
@@ -140,8 +140,8 @@
 }
 
 .bill-dialog-close:hover {
-  background: #f3f4f6;
-  color: #111827;
+  background: var(--surface-muted);
+  color: var(--text);
 
   transform: rotate(3deg);
 
@@ -160,7 +160,7 @@
 .bill-section-label {
   margin-bottom: 11px;
 
-  color: #374151;
+  color: var(--text-secondary);
 
   font-size: 12px;
   font-weight: 700;
@@ -189,10 +189,10 @@
 }
 
 .bill-category-group {
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   border-radius: 13px;
 
-  background: #ffffff;
+  background: var(--surface);
 
   overflow: hidden;
 
@@ -200,7 +200,7 @@
 }
 
 .bill-category-group.open {
-  border-color: #bfdbfe;
+  border-color: light-dark(#bfdbfe, #2a4363);
 }
 
 .bill-category-group-header {
@@ -216,7 +216,7 @@
   border: 0;
 
   background: transparent;
-  color: #111827;
+  color: var(--text);
 
   font-family: inherit;
   text-align: left;
@@ -225,12 +225,12 @@
 }
 
 .bill-category-group-header:hover {
-  background: #f8fbff;
+  background: light-dark(#f8fbff, #122135);
 }
 
 .bill-category-group.open .bill-category-group-header {
-  background: #f8fbff;
-  border-bottom: 1px solid #e5edf9;
+  background: light-dark(#f8fbff, #122135);
+  border-bottom: 1px solid light-dark(#e5edf9, #243855);
 }
 
 .bill-category-group-icon {
@@ -248,8 +248,8 @@
 
   border-radius: 999px;
 
-  background: #eff6ff;
-  color: #1d4ed8;
+  background: light-dark(#eff6ff, #132439);
+  color: light-dark(#1d4ed8, #5e82e8);
 
   font-size: 11px;
   font-weight: 650;
@@ -260,7 +260,7 @@
 .bill-category-group-chevron {
   margin-left: auto;
 
-  color: #6b7280;
+  color: var(--text-muted);
 
   font-size: 16px;
   line-height: 1;
@@ -288,11 +288,11 @@
 
   padding: 10px 6px;
 
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   border-radius: 13px;
 
-  background: #ffffff;
-  color: #374151;
+  background: var(--surface);
+  color: var(--text-secondary);
 
   transition:
     border-color 0.18s ease,
@@ -302,10 +302,10 @@
 }
 
 .bill-category-card:hover {
-  border-color: #93c5fd;
-  background: #f8fbff;
+  border-color: light-dark(#93c5fd, #325276);
+  background: light-dark(#f8fbff, #122135);
 
-  box-shadow: 0 3px 10px rgba(37, 99, 235, 0.08);
+  box-shadow: 0 3px 10px light-dark(rgba(37, 99, 235, 0.08), rgba(0, 0, 0, 0.20));
 
   transform: translateY(-2px);
 
@@ -315,8 +315,8 @@
 .bill-category-card.selected {
   border: 2px solid #2563eb;
 
-  background: #eff6ff;
-  color: #1d4ed8;
+  background: light-dark(#eff6ff, #132439);
+  color: light-dark(#1d4ed8, #5e82e8);
 
   box-shadow:
     0 3px 12px rgba(37, 99, 235, 0.12);
@@ -346,13 +346,13 @@
   margin-bottom: 25px;
   padding: 13px 15px;
 
-  border: 1px solid #dbeafe;
+  border: 1px solid light-dark(#dbeafe, #253b57);
   border-radius: 12px;
 
   background: linear-gradient(
     90deg,
-    #f8fbff,
-    #eff6ff
+    light-dark(#f8fbff, #122135),
+    light-dark(#eff6ff, #132439)
   );
 }
 
@@ -362,11 +362,11 @@
   margin-left: auto;
   padding: 7px 11px;
 
-  border: 1px solid #bfdbfe;
+  border: 1px solid light-dark(#bfdbfe, #2a4363);
   border-radius: 9px;
 
-  background: #ffffff;
-  color: #1d4ed8;
+  background: var(--surface);
+  color: light-dark(#1d4ed8, #5e82e8);
 
   font-size: 12px;
   font-weight: 650;
@@ -377,7 +377,7 @@
 }
 
 .bill-customize-button:hover {
-  background: #dbeafe;
+  background: light-dark(#dbeafe, #162942);
 }
 
 .meter-settings-dialog {
@@ -396,11 +396,11 @@
 
   border-radius: 9px;
 
-  background: #ffffff;
+  background: var(--surface);
 
   font-size: 18px;
 
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 3px light-dark(rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.15));
 }
 
 .bill-selected-info div {
@@ -411,14 +411,14 @@
 }
 
 .bill-selected-info strong {
-  color: #1e3a8a;
+  color: light-dark(#1e3a8a, #7591e1);
 
   font-size: 12px;
   font-weight: 700;
 }
 
 .bill-selected-info div > span {
-  color: #64748b;
+  color: light-dark(#64748b, #94a1b2);
 
   font-size: 11px;
 }
@@ -452,7 +452,7 @@
 
   margin-bottom: 14px;
 
-  color: #111827;
+  color: var(--text);
 
   font-size: 13px;
   font-weight: 750;
@@ -477,7 +477,7 @@
 
   margin: 0 !important;
 
-  color: #374151;
+  color: var(--text-secondary);
 
   font-size: 11px !important;
   font-weight: 650 !important;
@@ -497,11 +497,11 @@
   margin: 0 !important;
   padding: 12px 13px;
 
-  border: 1px solid #d6dae1;
+  border: 1px solid light-dark(#d6dae1, #3d4554);
   border-radius: 9px;
 
-  background: #ffffff;
-  color: #111827;
+  background: var(--surface);
+  color: var(--text);
 
   font-family: inherit;
 
@@ -518,7 +518,7 @@
 .bill-field input:hover,
 .bill-field select:hover,
 .bill-field textarea:hover {
-  border-color: #b8c0cc;
+  border-color: light-dark(#b8c0cc, #495566);
 }
 
 .bill-field input:focus,
@@ -527,7 +527,7 @@
   border-color: #3b82f6;
 
   box-shadow:
-    0 0 0 3px rgba(59, 130, 246, 0.1);
+    0 0 0 3px light-dark(rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.3));
 }
 
 .bill-field input::placeholder,
@@ -536,8 +536,8 @@
 }
 
 .bill-field input:read-only {
-  background: #f8fafc;
-  color: #64748b;
+  background: light-dark(#f8fafc, #162433);
+  color: light-dark(#64748b, #94a1b2);
 }
 
 .bill-field small {
@@ -545,7 +545,7 @@
 
   margin-top: 5px;
 
-  color: #9ca3af;
+  color: var(--text-subtle);
 
   font-size: 9px;
   font-weight: 400;
@@ -578,7 +578,7 @@
 
   transform: translateY(-50%);
 
-  color: #6b7280;
+  color: var(--text-muted);
 
   font-size: 10px;
   font-weight: 650;
@@ -603,7 +603,7 @@
 
   transform: translateY(-50%);
 
-  color: #6b7280;
+  color: var(--text-muted);
 
   font-size: 14px;
   font-weight: 700;
@@ -633,10 +633,10 @@
   margin-top: 18px;
   padding: 13px 15px;
 
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   border-radius: 12px;
 
-  background: #f9fafb;
+  background: var(--surface-subtle);
 
   cursor: pointer;
 }
@@ -649,7 +649,7 @@
 
   flex-shrink: 0;
 
-  accent-color: #2563eb;
+  accent-color: light-dark(#2563eb, #5e89e8);
 
   cursor: pointer;
 }
@@ -662,14 +662,14 @@
 }
 
 .bill-recurring-field strong {
-  color: #111827;
+  color: var(--text);
 
   font-size: 12px;
   font-weight: 700;
 }
 
 .bill-recurring-field small {
-  color: #6b7280;
+  color: var(--text-muted);
 
   font-size: 11px;
 }
@@ -683,13 +683,13 @@
   margin: -2px 0 27px;
   padding: 18px;
 
-  border: 1px solid #dbeafe;
+  border: 1px solid light-dark(#dbeafe, #253b57);
   border-radius: 14px;
 
   background: linear-gradient(
     135deg,
-    #f8fbff 0%,
-    #eff6ff 100%
+    light-dark(#f8fbff, #122135) 0%,
+    light-dark(#eff6ff, #132439) 100%
   );
 }
 
@@ -713,7 +713,7 @@
 }
 
 .bill-calculation-top strong {
-  color: #1e3a8a;
+  color: light-dark(#1e3a8a, #7591e1);
 
   font-size: 12px;
 }
@@ -723,8 +723,8 @@
 
   border-radius: 20px;
 
-  background: #dbeafe;
-  color: #2563eb;
+  background: light-dark(#dbeafe, #162942);
+  color: light-dark(#2563eb, #5e89e8);
 
   font-size: 9px;
   font-weight: 700;
@@ -754,14 +754,14 @@
 
 .bill-calc-item > span,
 .bill-calc-total > span {
-  color: #64748b;
+  color: light-dark(#64748b, #94a1b2);
 
   font-size: 9px;
   font-weight: 500;
 }
 
 .bill-calc-item strong {
-  color: #1e293b;
+  color: light-dark(#1e293b, #c4cfe1);
 
   font-size: 18px;
   font-weight: 750;
@@ -788,11 +788,11 @@
 
   padding-left: 17px;
 
-  border-left: 1px solid #bfdbfe;
+  border-left: 1px solid light-dark(#bfdbfe, #2a4363);
 }
 
 .bill-calc-total strong {
-  color: #2563eb;
+  color: light-dark(#2563eb, #5e89e8);
 
   font-size: 22px;
   font-weight: 800;
@@ -812,7 +812,7 @@
 
   padding-top: 21px;
 
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border);
 }
 
 .bill-dialog-actions button {
@@ -831,12 +831,12 @@
 }
 
 .bill-cancel-button {
-  background: #f3f4f6;
-  color: #374151;
+  background: var(--surface-muted);
+  color: var(--text-secondary);
 }
 
 .bill-cancel-button:hover {
-  background: #e5e7eb;
+  background: light-dark(#e5e7eb, #292d35);
   opacity: 1;
 }
 
@@ -1014,7 +1014,7 @@
     padding-top: 13px;
     padding-left: 0;
 
-    border-top: 1px solid #bfdbfe;
+    border-top: 1px solid light-dark(#bfdbfe, #2a4363);
     border-left: 0;
   }
 

@@ -10,6 +10,8 @@ import {
 
 import type { Bill, BillCategory, Budgets } from "../types/bill";
 
+import ChevronIcon from "./ChevronIcon";
+
 import "./MonthlySummary.css";
 
 interface MonthlySummaryProps {
@@ -176,7 +178,7 @@ export default function MonthlySummary({
           aria-controls="monthly-summary-body"
           onClick={() => setCollapsed((value) => !value)}>
           <span className="monthly-summary-chevron" aria-hidden="true">
-            ⌄
+            <ChevronIcon />
           </span>
 
           <span>
@@ -323,7 +325,7 @@ export default function MonthlySummary({
                       </span>
 
                       <span className="monthly-summary-row-chevron" aria-hidden="true">
-                        {row.count > 0 ? "⌄" : ""}
+                        {row.count > 0 && <ChevronIcon />}
                       </span>
                     </button>
 

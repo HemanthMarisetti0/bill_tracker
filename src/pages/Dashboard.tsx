@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 
 import { useAuth } from "../context/useAuth";
-import { db } from "../lib/firebase";
+import { db } from "../lib/firestore";
 
 import { logout } from "../services/authService";
 import { addBill, deleteBill, updateBill } from "../services/billService";
@@ -12,6 +12,7 @@ import {
   subscribeToMeterSettings,
 } from "../services/meterSettingsService";
 import { saveBudgets, subscribeToBudgets } from "../services/budgetService";
+import { saveProfile, subscribeToProfile } from "../services/profileService";
 import { generateRecurringBills } from "../services/recurringService";
 import { isOverdue } from "../lib/dates";
 
@@ -19,11 +20,14 @@ import BillForm from "../components/BillForm";
 import BillTable from "../components/BillTable";
 import MeterSettingsDialog from "../components/MeterSettingsDialog";
 import BudgetSettingsDialog from "../components/BudgetSettingsDialog";
+import ProfileSettingsDialog from "../components/ProfileSettingsDialog";
 import MonthlySummary from "../components/MonthlySummary";
 import MonthComparison from "../components/MonthComparison";
 import Loader from "../components/Loader";
+import ThemeToggle from "../components/ThemeToggle";
+import Credits from "../components/Credits";
 
-import type { Bill, Budgets, MeterSettings } from "../types/bill";
+import type { Bill, Budgets, MeterSettings, Profile } from "../types/bill";
 
 import "./Dashboard.css";
 
@@ -60,6 +64,12 @@ export default function Dashboard() {
 
   const [budgetsKey, setBudgetsKey] = useState(0);
 
+  const [profile, setProfile] = useState<Profile>({});
+
+  const [showProfile, setShowProfile] = useState(false);
+
+  const [profileKey, setProfileKey] = useState(0);
+
   /*
    * Prevents overlapping runs while
    * recurring copies are being written.
@@ -76,12 +86,8 @@ export default function Dashboard() {
    */
   useEffect(() => {
     if (!user) {
-      setBills([]);
-      setLoading(false);
       return;
     }
-
-    setLoading(true);
 
     const billsRef = collection(db, "users", user.uid, "bills");
 
@@ -145,6 +151,22 @@ export default function Dashboard() {
   }, [user]);
 
   /*
+   * Listen to the current user's
+   * profile (preferred name).
+   *
+   * Firestore path:
+   *
+   * users/{user.uid}/settings/profile
+   */
+  useEffect(() => {
+    if (!user) {
+      return;
+    }
+
+    return subscribeToProfile(user.uid, setProfile);
+  }, [user]);
+
+  /*
    * Add this month's copies of recurring
    * bills. The snapshot listener picks up
    * the new bills, and the templates are
@@ -179,6 +201,21 @@ export default function Dashboard() {
     await saveBudgets(user.uid, newBudgets);
 
     setShowBudgets(false);
+  }
+
+  function handleOpenProfile() {
+    setProfileKey((value) => value + 1);
+    setShowProfile(true);
+  }
+
+  async function handleSaveProfile(newProfile: Profile) {
+    if (!user) {
+      throw new Error("You must be logged in to save your profile.");
+    }
+
+    await saveProfile(user.uid, newProfile);
+
+    setShowProfile(false);
   }
 
   function handleOpenMeterSettings() {
@@ -307,6 +344,14 @@ export default function Dashboard() {
     return null;
   }
 
+  /*
+   * Prefer the preferred name, then the first
+   * name from the Google account.
+   */
+  const accountFirstName = user.displayName?.split(" ")[0] ?? "";
+
+  const displayName = profile.preferredName || accountFirstName;
+
   return (
     <div className="dashboard-page">
       <nav className="dashboard-navbar">
@@ -320,7 +365,11 @@ export default function Dashboard() {
         </div>
 
         <div className="dashboard-nav">
-          <div className="dashboard-user">
+          <button
+            type="button"
+            className="dashboard-user"
+            onClick={handleOpenProfile}
+            title="Edit profile">
             {user.photoURL ? (
               <img
                 src={user.photoURL}
@@ -328,18 +377,20 @@ export default function Dashboard() {
               />
             ) : (
               <div className="dashboard-user-avatar">
-                {(user.displayName ?? user.email ?? "U")
+                {(displayName || user.email || "U")
                   .charAt(0)
                   .toUpperCase()}
               </div>
             )}
 
             <div className="dashboard-user-info">
-              <strong>{user.displayName || "User"}</strong>
+              <strong>{displayName || "User"}</strong>
 
               <span>{user.email}</span>
             </div>
-          </div>
+          </button>
+
+          <ThemeToggle />
 
           <button
             type="button"
@@ -359,7 +410,13 @@ export default function Dashboard() {
 
             <h2>
               Welcome back
-              {user.displayName ? `, ${user.displayName.split(" ")[0]}` : ""}!
+              {displayName && (
+                <>
+                  ,{" "}
+                  <span className="dashboard-welcome-name">{displayName}</span>
+                </>
+              )}
+              !
             </h2>
 
             <p>Track and manage all your household bills in one place.</p>
@@ -461,6 +518,8 @@ export default function Dashboard() {
         </section>
       </main>
 
+      <Credits />
+
       <BillForm
         key={formKey}
         open={showBillForm}
@@ -477,6 +536,15 @@ export default function Dashboard() {
         settings={meterSettings}
         onClose={() => setShowMeterSettings(false)}
         onSave={handleSaveMeterSettings}
+      />
+
+      <ProfileSettingsDialog
+        key={profileKey}
+        open={showProfile}
+        profile={profile}
+        defaultName={accountFirstName}
+        onClose={() => setShowProfile(false)}
+        onSave={handleSaveProfile}
       />
 
       <BudgetSettingsDialog

@@ -9,7 +9,7 @@ import {
 
 import { collection, getDocs, orderBy, query } from "firebase/firestore";
 
-import { db } from "../lib/firebase";
+import { db } from "../lib/firestore";
 import { useAuth } from "../context/useAuth";
 
 import {
@@ -32,6 +32,8 @@ import type {
   BillStatus,
   MeterSettings,
 } from "../types/bill";
+
+import ChevronIcon from "./ChevronIcon";
 
 import "./BillForm.css";
 
@@ -571,7 +573,9 @@ ${message}`,
                         </span>
                       )}
 
-                      <span className="bill-category-group-chevron">⌄</span>
+                      <span className="bill-category-group-chevron">
+                        <ChevronIcon />
+                      </span>
                     </button>
 
                     {isOpen && (

@@ -12,10 +12,10 @@
   flex-direction: column;
   gap: 10px;
   box-sizing: border-box;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 14px;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+  box-shadow: 0 2px 8px light-dark(rgba(15, 23, 42, 0.03), rgba(0, 0, 0, 0.07));
 }
 
 .month-card-label {
@@ -24,7 +24,7 @@
   gap: 8px;
   font-size: 13px;
   font-weight: 600;
-  color: #4b5563;
+  color: light-dark(#4b5563, #9ca6b4);
 }
 
 .month-card-dot {
@@ -39,7 +39,7 @@
 }
 
 .month-card-dot.previous {
-  background: #94a3b8;
+  background: light-dark(#94a3b8, #455468);
 }
 
 .month-card-value {
@@ -50,7 +50,7 @@
   font-size: 26px;
   line-height: 1.1;
   font-weight: 750;
-  color: #111827;
+  color: var(--text);
 }
 
 .month-card-skeleton {
@@ -61,7 +61,7 @@
 .month-card-note {
   margin-top: auto;
   font-size: 12px;
-  color: #6b7280;
+  color: var(--text-muted);
 }
 
 .month-card-badge {
@@ -76,7 +76,7 @@
   height: 6px;
   overflow: hidden;
   border-radius: 999px;
-  background: #eef1f6;
+  background: light-dark(#eef1f6, #1c2636);
 }
 
 .month-card-meter span {
@@ -92,35 +92,35 @@
 ========================= */
 
 .month-card-savings.saved {
-  border-color: #bfe8cf;
-  background: linear-gradient(135deg, #f1fbf5, #ffffff 70%);
+  border-color: light-dark(#bfe8cf, #2e6c46);
+  background: linear-gradient(135deg, light-dark(#f1fbf5, #133a23), var(--surface) 70%);
 }
 
 .month-card-savings.saved .month-card-label {
-  color: #1d7a47;
+  color: light-dark(#1d7a47, #85e2af);
 }
 
 .month-card-savings.saved .month-card-badge {
-  background: #dcf5e6;
-  color: #1d7a47;
+  background: light-dark(#dcf5e6, #17462a);
+  color: light-dark(#1d7a47, #85e2af);
 }
 
 .month-card-savings.more {
-  border-color: #f5d0cd;
-  background: linear-gradient(135deg, #fff5f4, #ffffff 70%);
+  border-color: light-dark(#f5d0cd, #612e29);
+  background: linear-gradient(135deg, light-dark(#fff5f4, #371612), var(--surface) 70%);
 }
 
 .month-card-savings.more .month-card-label {
-  color: #c0392b;
+  color: light-dark(#c0392b, #dd7469);
 }
 
 .month-card-savings.more .month-card-badge {
-  background: #ffe3e0;
-  color: #c0392b;
+  background: light-dark(#ffe3e0, #401915);
+  color: light-dark(#c0392b, #dd7469);
 }
 
 .month-card-savings.more .month-card-meter span {
-  background: #e0605a;
+  background: light-dark(#e0605a, #8a322e);
 }
 
 @media (max-width: 900px) {

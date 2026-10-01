@@ -1,9 +1,15 @@
+import { lazy, Suspense } from "react";
+
 import { useAuth } from "./context/useAuth";
 
-import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
-
 import Loader from "./components/Loader";
+
+/*
+ * Loaded on demand so the login page
+ * doesn't download the dashboard.
+ */
+const Login = lazy(() => import("./pages/Login"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
 
 function App() {
   const { user, loading } = useAuth();
@@ -12,10 +18,12 @@ function App() {
     return <Loader variant="page" message="Getting things ready..." />;
   }
 
-  return user ? (
-    <Dashboard />
-  ) : (
-    <Login />
+  return (
+    <Suspense
+      fallback={<Loader variant="page" message="Getting things ready..." />}>
+      {/* Keyed so switching accounts starts with fresh state. */}
+      {user ? <Dashboard key={user.uid} /> : <Login />}
+    </Suspense>
   );
 }
 

@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { loginWithGoogle } from "../services/authService";
 
+import ThemeToggle from "../components/ThemeToggle";
+import Credits from "../components/Credits";
+
 import "./Login.css";
 
 export default function Login() {
@@ -25,6 +28,8 @@ export default function Login() {
     <div className="login-page">
       <div className="login-background-shape login-shape-one" />
       <div className="login-background-shape login-shape-two" />
+
+      <ThemeToggle className="login-theme-toggle" />
 
       <main className="login-container">
         <div className="login-card">
@@ -124,6 +129,8 @@ export default function Login() {
         <p className="login-footer">
           Simple. Secure. Organized.
         </p>
+
+        <Credits />
       </main>
     </div>
   );

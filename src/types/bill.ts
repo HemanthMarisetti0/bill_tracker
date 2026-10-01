@@ -109,3 +109,14 @@ export type MeterSettings = Partial<Record<MeterCategory, MeterSetting>>;
  * Monthly spending limit per category, in ₹.
  */
 export type Budgets = Partial<Record<BillCategory, number>>;
+
+/*
+ * Per-user profile preferences.
+ */
+export interface Profile {
+  /*
+   * What the app calls the user,
+   * e.g. in the welcome message.
+   */
+  preferredName?: string;
+}

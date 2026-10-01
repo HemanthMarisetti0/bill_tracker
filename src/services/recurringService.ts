@@ -1,6 +1,6 @@
 import { doc, serverTimestamp, writeBatch } from "firebase/firestore";
 
-import { db } from "../lib/firebase";
+import { db } from "../lib/firestore";
 import { isMeterCategory } from "../lib/categories";
 import {
   addMonths,
