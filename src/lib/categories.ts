@@ -99,7 +99,8 @@ export const categoryConfig: Record<BillCategory, CategoryConfig> = {
   assets: {
     label: "Assets",
     icon: "💎",
-    description: "Track gold, electronics, furniture and other things you buy to keep",
+    description:
+      "Track gold, electronics, furniture and other things you buy to keep",
     meterBased: false,
   },
 
@@ -158,7 +159,12 @@ export const categoryConfig: Record<BillCategory, CategoryConfig> = {
     description: "Track maid, cook or driver salary",
     meterBased: false,
   },
-
+  movies: {
+    label: "Movies",
+    icon: "🍿",
+    description: "Track movie tickets and cinema expenses",
+    meterBased: false,
+  },
   petrol: {
     label: "Petrol",
     icon: "⛽",
@@ -244,7 +250,15 @@ export const categoryGroups: CategoryGroup[] = [
   {
     label: "Travel & Others",
     icon: "🧭",
-    categories: ["petrol", "vehicle", "travel", "pooja", "gifts", "other"],
+    categories: [
+      "movies",
+      "petrol",
+      "vehicle",
+      "travel",
+      "pooja",
+      "gifts",
+      "other",
+    ],
   },
 ];
 

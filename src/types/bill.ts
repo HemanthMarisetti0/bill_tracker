@@ -12,6 +12,7 @@ export type BillCategory =
   | "emi"
   | "insurance"
   | "subscriptions"
+  | "movies"
   | "education"
   | "assets"
   | "groceries"
