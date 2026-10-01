@@ -16,6 +16,8 @@ export type BillCategory =
   | "assets"
   | "groceries"
   | "milk"
+  | "drinking-water"
+  | "juice"
   | "food"
   | "medical"
   | "shopping"

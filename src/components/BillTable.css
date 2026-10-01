@@ -474,6 +474,14 @@
   background: #f2f6fa;
 }
 
+.bill-category-badge.drinking-water {
+  background: #e8f4fd;
+}
+
+.bill-category-badge.juice {
+  background: #fff4e0;
+}
+
 .bill-category-badge.medical {
   background: #ffecee;
 }

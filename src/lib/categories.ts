@@ -111,9 +111,23 @@ export const categoryConfig: Record<BillCategory, CategoryConfig> = {
   },
 
   milk: {
-    label: "Milk & Paper",
+    label: "Dairy Products",
     icon: "🥛",
-    description: "Track milk, newspaper and other daily deliveries",
+    description: "Track milk, curd, paneer, butter and other dairy products",
+    meterBased: false,
+  },
+
+  "drinking-water": {
+    label: "Drinking Water",
+    icon: "🚰",
+    description: "Track water cans and drinking water delivery",
+    meterBased: false,
+  },
+
+  juice: {
+    label: "Juice",
+    icon: "🧃",
+    description: "Track juice and beverage purchases",
     meterBased: false,
   },
 
@@ -219,6 +233,8 @@ export const categoryGroups: CategoryGroup[] = [
     categories: [
       "groceries",
       "milk",
+      "drinking-water",
+      "juice",
       "food",
       "medical",
       "shopping",
