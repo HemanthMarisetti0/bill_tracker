@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 
-import { categories, categoryConfig } from "../lib/categories";
+import { useCategories } from "../context/useCategories";
 import {
   addMonths,
   getCurrentMonthKey,
@@ -8,7 +8,7 @@ import {
   toMonthKey,
 } from "../lib/dates";
 
-import type { Bill, BillCategory, Budgets } from "../types/bill";
+import type { Bill, Budgets, CategoryId } from "../types/bill";
 
 import ChevronIcon from "./ChevronIcon";
 
@@ -21,7 +21,7 @@ interface MonthlySummaryProps {
 }
 
 interface SummaryRow {
-  category: BillCategory;
+  category: CategoryId;
   spent: number;
   count: number;
   budget?: number;
@@ -98,6 +98,8 @@ export default function MonthlySummary({
   budgets,
   onEditBudgets,
 }: MonthlySummaryProps) {
+  const catalog = useCategories();
+
   const currentMonth = getCurrentMonthKey();
 
   const [month, setMonth] = useState(currentMonth);
@@ -108,7 +110,7 @@ export default function MonthlySummary({
    * Category whose bills are listed
    * under its row, if any.
    */
-  const [expanded, setExpanded] = useState<BillCategory | null>(null);
+  const [expanded, setExpanded] = useState<CategoryId | null>(null);
 
   function changeMonth(months: number) {
     setMonth((value) => shiftMonth(value, months));
@@ -116,7 +118,7 @@ export default function MonthlySummary({
   }
 
   const rows = useMemo(() => {
-    const totals = new Map<BillCategory, { spent: number; bills: Bill[] }>();
+    const totals = new Map<CategoryId, { spent: number; bills: Bill[] }>();
 
     for (const bill of bills) {
       if (toMonthKey(bill.billingDate) !== month) {
@@ -135,6 +137,15 @@ export default function MonthlySummary({
      * Show every category with spending
      * or a budget, biggest spend first.
      */
+    /*
+     * Bills whose type was removed are
+     * still counted, after the known types.
+     */
+    const categories = [
+      ...catalog.all,
+      ...[...totals.keys()].filter((category) => !catalog.all.includes(category)),
+    ];
+
     return categories
       .map((category): SummaryRow => ({
         category,
@@ -147,7 +158,7 @@ export default function MonthlySummary({
       }))
       .filter((row) => row.count > 0 || row.budget)
       .sort((a, b) => b.spent - a.spent);
-  }, [bills, budgets, month]);
+  }, [bills, budgets, month, catalog]);
 
   const totalSpent = rows.reduce((total, row) => total + row.spent, 0);
 
@@ -253,7 +264,7 @@ export default function MonthlySummary({
           ) : (
             <ul className="monthly-summary-list">
               {rows.map((row) => {
-                const config = categoryConfig[row.category];
+                const config = catalog.getConfig(row.category);
 
                 const status = getBudgetStatus(row);
 

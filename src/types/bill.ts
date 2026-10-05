@@ -46,10 +46,16 @@ export type BillCategory =
 
 export type BillStatus = "paid" | "unpaid";
 
+/*
+ * A built-in category, or the id of a
+ * type the user added themselves.
+ */
+export type CategoryId = BillCategory | (string & {});
+
 export interface Bill {
   id?: string;
 
-  category: BillCategory;
+  category: CategoryId;
 
   billingDate: string;
 
@@ -108,7 +114,7 @@ export type MeterSettings = Partial<Record<MeterCategory, MeterSetting>>;
 /*
  * Monthly spending limit per category, in ₹.
  */
-export type Budgets = Partial<Record<BillCategory, number>>;
+export type Budgets = Partial<Record<CategoryId, number>>;
 
 /*
  * Per-user profile preferences.
@@ -119,4 +125,60 @@ export interface Profile {
    * e.g. in the welcome message.
    */
   preferredName?: string;
+}
+
+/*
+ * A bill type the user added.
+ */
+export interface CustomCategory {
+  id: string;
+
+  label: string;
+
+  icon: string;
+
+  /*
+   * Label of the category group
+   * it is listed under.
+   */
+  group: string;
+}
+
+/*
+ * Per-user bill type preferences.
+ */
+export interface CategorySettings {
+  custom?: CustomCategory[];
+
+  /*
+   * Types left out of pickers
+   * and filters.
+   */
+  hidden?: CategoryId[];
+}
+
+export type IncomeSource =
+  | "salary"
+  | "bonus"
+  | "freelance"
+  | "rental"
+  | "interest"
+  | "other";
+
+export interface Income {
+  id?: string;
+
+  source: IncomeSource;
+
+  amount: number;
+
+  /*
+   * Date the money was received
+   * (YYYY-MM-DD).
+   */
+  date: string;
+
+  notes?: string;
+
+  createdAt?: Timestamp;
 }

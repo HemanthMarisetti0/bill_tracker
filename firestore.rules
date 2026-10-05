@@ -39,6 +39,15 @@ service cloud.firestore {
       }
 
 
+      // User's income (salary and other earnings)
+      match /income/{incomeId} {
+
+        // Only the logged-in user can access their own income
+        allow read, write: if request.auth != null
+          && request.auth.uid == userId;
+      }
+
+
       // User's settings (e.g. settings/meters)
       match /settings/{settingId} {
 

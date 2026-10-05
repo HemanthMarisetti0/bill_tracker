@@ -1,9 +1,10 @@
 import { useMemo, useState } from "react";
 
-import { categories, categoryConfig } from "../lib/categories";
+import { useCategories } from "../context/useCategories";
+import type { CategoryCatalog } from "../lib/categories";
 import { getToday, isOverdue, toDateString } from "../lib/dates";
 
-import type { Bill, BillCategory, BillStatus } from "../types/bill";
+import type { Bill, BillStatus, CategoryId } from "../types/bill";
 
 import "./BillTable.css";
 
@@ -11,6 +12,14 @@ interface BillTableProps {
   bills: Bill[];
   onDelete: (billId: string) => void;
   onEdit: (bill: Bill) => void;
+  /*
+   * For tables that only show
+   * one category.
+   */
+  hideCategoryFilter?: boolean;
+  emptyIcon?: string;
+  emptyTitle?: string;
+  emptyMessage?: string;
 }
 
 type Period = "this-month" | "last-month" | "all" | "custom";
@@ -98,7 +107,11 @@ function escapeCsvValue(value: unknown): string {
   return stringValue;
 }
 
-function downloadBillsAsCsv(bills: Bill[], range: DateRange) {
+function downloadBillsAsCsv(
+  bills: Bill[],
+  range: DateRange,
+  catalog: CategoryCatalog,
+) {
   const headers = [
     "Date",
     "Category",
@@ -117,7 +130,7 @@ function downloadBillsAsCsv(bills: Bill[], range: DateRange) {
 
   const rows = bills.map((bill) => [
     bill.billingDate,
-    categoryConfig[bill.category].label,
+    catalog.getConfig(bill.category).label,
     bill.previousReading ?? "",
     bill.currentReading ?? "",
     bill.consumption ?? "",
@@ -158,8 +171,18 @@ function downloadBillsAsCsv(bills: Bill[], range: DateRange) {
   URL.revokeObjectURL(url);
 }
 
-export default function BillTable({ bills, onDelete, onEdit }: BillTableProps) {
-  const [categoryFilter, setCategoryFilter] = useState<BillCategory | "all">(
+export default function BillTable({
+  bills,
+  onDelete,
+  onEdit,
+  hideCategoryFilter = false,
+  emptyIcon = "🧾",
+  emptyTitle = "No bills yet",
+  emptyMessage = "Add your first bill to start tracking.",
+}: BillTableProps) {
+  const catalog = useCategories();
+
+  const [categoryFilter, setCategoryFilter] = useState<CategoryId | "all">(
     "all",
   );
 
@@ -199,13 +222,28 @@ export default function BillTable({ bills, onDelete, onEdit }: BillTableProps) {
 
       const matchesSearch =
         !searchValue ||
-        categoryConfig[bill.category].label.toLowerCase().includes(searchValue) ||
+        catalog
+          .getConfig(bill.category)
+          .label.toLowerCase()
+          .includes(searchValue) ||
         bill.billingDate.toLowerCase().includes(searchValue) ||
         bill.notes?.toLowerCase().includes(searchValue);
 
       return matchesDate && matchesCategory && matchesStatus && matchesSearch;
     });
-  }, [bills, dateRange, categoryFilter, statusFilter, search, today]);
+  }, [bills, dateRange, categoryFilter, statusFilter, search, today, catalog]);
+
+  /*
+   * Hidden types are only offered
+   * while some bill still uses them.
+   */
+  const filterCategories = useMemo(() => {
+    const used = new Set(bills.map((bill) => bill.category));
+
+    return catalog.all.filter(
+      (category) => !catalog.isHidden(category) || used.has(category),
+    );
+  }, [bills, catalog]);
 
   const totals = useMemo(() => {
     let total = 0;
@@ -260,7 +298,7 @@ export default function BillTable({ bills, onDelete, onEdit }: BillTableProps) {
       return;
     }
 
-    downloadBillsAsCsv(filteredBills, dateRange);
+    downloadBillsAsCsv(filteredBills, dateRange, catalog);
   }
 
   const hasFilters =
@@ -274,11 +312,11 @@ export default function BillTable({ bills, onDelete, onEdit }: BillTableProps) {
   if (bills.length === 0) {
     return (
       <div className="empty-state">
-        <div className="empty-state-icon">🧾</div>
+        <div className="empty-state-icon">{emptyIcon}</div>
 
-        <h3>No bills yet</h3>
+        <h3>{emptyTitle}</h3>
 
-        <p>Add your first bill to start tracking.</p>
+        <p>{emptyMessage}</p>
       </div>
     );
   }
@@ -354,21 +392,21 @@ export default function BillTable({ bills, onDelete, onEdit }: BillTableProps) {
           />
         </div>
 
-        <div className="bill-filter-select">
-          <select
-            value={categoryFilter}
-            onChange={(event) =>
-              setCategoryFilter(event.target.value as BillCategory | "all")
-            }>
-            <option value="all">All Categories</option>
+        {!hideCategoryFilter && (
+          <div className="bill-filter-select">
+            <select
+              value={categoryFilter}
+              onChange={(event) => setCategoryFilter(event.target.value)}>
+              <option value="all">All Categories</option>
 
-            {categories.map((category) => (
-              <option key={category} value={category}>
-                {categoryConfig[category].label}
-              </option>
-            ))}
-          </select>
-        </div>
+              {filterCategories.map((category) => (
+                <option key={category} value={category}>
+                  {catalog.getConfig(category).label}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         <div className="bill-filter-select">
           <select
@@ -470,129 +508,133 @@ export default function BillTable({ bills, onDelete, onEdit }: BillTableProps) {
             </thead>
 
             <tbody>
-              {filteredBills.map((bill) => (
-                <tr key={bill.id}>
-                  <td data-label="Bill">
-                    <div className="bill-category-cell">
-                      <span className={`bill-category-badge ${bill.category}`}>
-                        {categoryConfig[bill.category].icon}
-                      </span>
+              {filteredBills.map((bill) => {
+                const config = catalog.getConfig(bill.category);
 
-                      <div>
-                        <span className="category-name">
-                          {categoryConfig[bill.category].label}
-
-                          {(bill.recurring || bill.recurringSourceId) && (
-                            <span
-                              className="bill-recurring-tag"
-                              title={
-                                bill.recurring
-                                  ? "Repeats every month"
-                                  : "Added from a monthly bill"
-                              }>
-                              🔁 Monthly
-                            </span>
-                          )}
+                return (
+                  <tr key={bill.id}>
+                    <td data-label="Bill">
+                      <div className="bill-category-cell">
+                        <span className={`bill-category-badge ${bill.category}`}>
+                          {config.icon}
                         </span>
 
-                        {bill.notes && (
-                          <span className="bill-notes" title={bill.notes}>
-                            {bill.notes}
+                        <div>
+                          <span className="category-name">
+                            {config.label}
+
+                            {(bill.recurring || bill.recurringSourceId) && (
+                              <span
+                                className="bill-recurring-tag"
+                                title={
+                                  bill.recurring
+                                    ? "Repeats every month"
+                                    : "Added from a monthly bill"
+                                }>
+                                🔁 Monthly
+                              </span>
+                            )}
+                          </span>
+
+                          {bill.notes && (
+                            <span className="bill-notes" title={bill.notes}>
+                              {bill.notes}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+
+                    <td data-label="Date">
+                      <div>
+                        <span className="bill-date">
+                          {formatDate(bill.billingDate)}
+                        </span>
+
+                        {bill.status === "paid" && bill.paymentDate && (
+                          <span className="bill-subtext">
+                            Paid {formatDate(bill.paymentDate)}
+                          </span>
+                        )}
+
+                        {bill.status === "unpaid" && bill.dueDate && (
+                          <span
+                            className={`bill-subtext ${
+                              isOverdue(bill, today) ? "overdue" : ""
+                            }`}>
+                            Due {formatDate(bill.dueDate)}
                           </span>
                         )}
                       </div>
-                    </div>
-                  </td>
+                    </td>
 
-                  <td data-label="Date">
-                    <div>
-                      <span className="bill-date">
-                        {formatDate(bill.billingDate)}
-                      </span>
+                    <td data-label="Usage">
+                      {bill.consumption !== undefined ? (
+                        <div>
+                          <span className="bill-usage">
+                            {bill.consumption.toLocaleString("en-IN")}{" "}
+                            {bill.unit ?? ""}
+                          </span>
 
-                      {bill.status === "paid" && bill.paymentDate && (
-                        <span className="bill-subtext">
-                          Paid {formatDate(bill.paymentDate)}
-                        </span>
+                          {bill.previousReading !== undefined &&
+                            bill.currentReading !== undefined && (
+                              <span className="bill-subtext">
+                                {bill.previousReading.toLocaleString("en-IN")} →{" "}
+                                {bill.currentReading.toLocaleString("en-IN")}
+                              </span>
+                            )}
+                        </div>
+                      ) : (
+                        <span className="bill-muted">—</span>
                       )}
+                    </td>
 
-                      {bill.status === "unpaid" && bill.dueDate && (
-                        <span
-                          className={`bill-subtext ${
-                            isOverdue(bill, today) ? "overdue" : ""
-                          }`}>
-                          Due {formatDate(bill.dueDate)}
-                        </span>
-                      )}
-                    </div>
-                  </td>
-
-                  <td data-label="Usage">
-                    {bill.consumption !== undefined ? (
+                    <td data-label="Amount" className="bill-amount align-right">
                       <div>
-                        <span className="bill-usage">
-                          {bill.consumption.toLocaleString("en-IN")}{" "}
-                          {bill.unit ?? ""}
-                        </span>
+                        {formatCurrency(Number(bill.amount || 0))}
 
-                        {bill.previousReading !== undefined &&
-                          bill.currentReading !== undefined && (
-                            <span className="bill-subtext">
-                              {bill.previousReading.toLocaleString("en-IN")} →{" "}
-                              {bill.currentReading.toLocaleString("en-IN")}
-                            </span>
-                          )}
+                        {bill.rate !== undefined && (
+                          <span className="bill-subtext">
+                            @ ₹{bill.rate}/{bill.unit ?? "unit"}
+                          </span>
+                        )}
                       </div>
-                    ) : (
-                      <span className="bill-muted">—</span>
-                    )}
-                  </td>
+                    </td>
 
-                  <td data-label="Amount" className="bill-amount align-right">
-                    <div>
-                      {formatCurrency(Number(bill.amount || 0))}
-
-                      {bill.rate !== undefined && (
-                        <span className="bill-subtext">
-                          @ ₹{bill.rate}/{bill.unit ?? "unit"}
+                    <td data-label="Status">
+                      {isOverdue(bill, today) ? (
+                        <span className="status overdue">Overdue</span>
+                      ) : (
+                        <span className={`status ${bill.status}`}>
+                          {bill.status === "paid" ? "Paid" : "Unpaid"}
                         </span>
                       )}
-                    </div>
-                  </td>
+                    </td>
 
-                  <td data-label="Status">
-                    {isOverdue(bill, today) ? (
-                      <span className="status overdue">Overdue</span>
-                    ) : (
-                      <span className={`status ${bill.status}`}>
-                        {bill.status === "paid" ? "Paid" : "Unpaid"}
-                      </span>
-                    )}
-                  </td>
+                    <td data-label="Actions" className="align-right">
+                      <div className="bill-actions">
+                        <button
+                          type="button"
+                          className="edit-button"
+                          onClick={() => onEdit(bill)}>
+                          Edit
+                        </button>
 
-                  <td data-label="Actions" className="align-right">
-                    <div className="bill-actions">
-                      <button
-                        type="button"
-                        className="edit-button"
-                        onClick={() => onEdit(bill)}>
-                        Edit
-                      </button>
-
-                      <button
-                        type="button"
-                        className="delete-button"
-                        onClick={() => {
-                          if (bill.id) {
-                            onDelete(bill.id);
-                          }
-                        }}>
-                        Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                        <button
+                          type="button"
+                          className="delete-button"
+                          onClick={() => {
+                            if (bill.id) {
+                              onDelete(bill.id);
+                            }
+                          }}>
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
 
             <tfoot>

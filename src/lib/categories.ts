@@ -1,4 +1,9 @@
-import type { BillCategory, MeterCategory } from "../types/bill";
+import type {
+  BillCategory,
+  CategoryId,
+  CategorySettings,
+  MeterCategory,
+} from "../types/bill";
 
 export interface CategoryConfig {
   label: string;
@@ -310,7 +315,7 @@ export const categoryConfig: Record<BillCategory, CategoryConfig> = {
 export interface CategoryGroup {
   label: string;
   icon: string;
-  categories: BillCategory[];
+  categories: CategoryId[];
 }
 
 export const categoryGroups: CategoryGroup[] = [
@@ -377,23 +382,125 @@ export const categoryGroups: CategoryGroup[] = [
   },
 ];
 
-/*
- * Display order for category pickers,
- * filters and summaries.
- */
-export const categories = categoryGroups.flatMap((group) => group.categories);
-
-export function getCategoryGroup(category: BillCategory): CategoryGroup {
-  return (
-    categoryGroups.find((group) => group.categories.includes(category)) ??
-    categoryGroups[0]
-  );
-}
-
-export const meterCategories: BillCategory[] = ["water", "electricity", "gas"];
+export const meterCategories: CategoryId[] = ["water", "electricity", "gas"];
 
 export function isMeterCategory(
-  category: BillCategory,
+  category: CategoryId,
 ): category is MeterCategory {
   return meterCategories.includes(category);
+}
+
+export const INVESTMENT_CATEGORY: BillCategory = "investments";
+
+export function isBuiltInCategory(category: CategoryId): category is BillCategory {
+  return Object.hasOwn(categoryConfig, category);
+}
+
+/*
+ * Built-in and user-added types,
+ * with the user's hidden list applied.
+ */
+export interface CategoryCatalog {
+  /*
+   * Every group, including
+   * hidden types.
+   */
+  groups: CategoryGroup[];
+
+  /*
+   * Groups without hidden types;
+   * empty groups are dropped.
+   */
+  visibleGroups: CategoryGroup[];
+
+  /*
+   * Display order for summaries
+   * and filters.
+   */
+  all: CategoryId[];
+
+  visible: CategoryId[];
+
+  isHidden: (category: CategoryId) => boolean;
+
+  isCustom: (category: CategoryId) => boolean;
+
+  getConfig: (category: CategoryId) => CategoryConfig;
+
+  getGroup: (category: CategoryId) => CategoryGroup;
+}
+
+/*
+ * Shown for a bill whose type
+ * no longer exists.
+ */
+function unknownConfig(category: CategoryId): CategoryConfig {
+  return {
+    label: category,
+    icon: "🏷️",
+    description: "This type was removed",
+    meterBased: false,
+  };
+}
+
+export function buildCategoryCatalog(
+  settings: CategorySettings = {},
+): CategoryCatalog {
+  const custom = settings.custom ?? [];
+
+  const hidden = new Set(settings.hidden ?? []);
+
+  const config: Record<CategoryId, CategoryConfig> = { ...categoryConfig };
+
+  for (const item of custom) {
+    config[item.id] = {
+      label: item.label,
+      icon: item.icon,
+      description: `Track ${item.label.toLowerCase()} expenses`,
+      meterBased: false,
+    };
+  }
+
+  const groups = categoryGroups.map((group) => ({
+    ...group,
+    categories: [
+      ...group.categories,
+      ...custom
+        .filter((item) => item.group === group.label)
+        .map((item) => item.id),
+    ],
+  }));
+
+  /*
+   * A custom type whose group was
+   * renamed goes in the last group.
+   */
+  const lastGroup = groups[groups.length - 1];
+
+  for (const item of custom) {
+    if (!groups.some((group) => group.categories.includes(item.id))) {
+      lastGroup.categories.push(item.id);
+    }
+  }
+
+  const visibleGroups = groups
+    .map((group) => ({
+      ...group,
+      categories: group.categories.filter((category) => !hidden.has(category)),
+    }))
+    .filter((group) => group.categories.length > 0);
+
+  const customIds = new Set(custom.map((item) => item.id));
+
+  return {
+    groups,
+    visibleGroups,
+    all: groups.flatMap((group) => group.categories),
+    visible: visibleGroups.flatMap((group) => group.categories),
+    isHidden: (category) => hidden.has(category),
+    isCustom: (category) => customIds.has(category),
+    getConfig: (category) => config[category] ?? unknownConfig(category),
+    getGroup: (category) =>
+      groups.find((group) => group.categories.includes(category)) ?? lastGroup,
+  };
 }

@@ -1,21 +1,55 @@
 # Bill Tracker
 
-A web app for tracking household bills and expenses. Sign in with Google, log bills by category, and see what's paid and what's still due.
+A web app for tracking household bills, salary and investments. Sign in with Google, log bills by type, record your salary, and see what's paid, what's still due, and how much is left each month.
 
 Built with React, TypeScript, Vite and Firebase (Authentication + Cloud Firestore).
 
 ## Features
 
-- Google sign-in
-- Add, edit and delete bills across 40+ categories, grouped into Utilities, Home & Finance, Household, Health & Lifestyle, and Travel & Others
-- Meter-based bills (Water, Electricity, Gas) take previous and current readings plus a rate and work out consumption and amount for you. You can set each meter's starting reading and rate, or enter an amount directly when there's no reading
-- Recurring bills: mark a bill as recurring and an unpaid copy is added each month
+The dashboard is split into five tabs.
+
+### 📊 Overview
+
+- This month's **Income**, **Spent on bills**, **Invested** and **Left this month**
+- A reminder to **add this month's salary** if you haven't yet
+- This month vs last month, with how much you saved or overspent
+- Monthly summary by type, with optional monthly budgets that warn at 80% and when you go over. Click a type to see its bills
+
+### 🧾 Bills
+
+- Add, edit and delete bills across 40+ built-in types, grouped into Utilities, Home & Finance, Household, Health & Lifestyle, and Travel & Others
+- Meter-based bills (Water, Electricity, Gas) take previous and current readings plus a rate and work out consumption and amount for you. You can set each meter's starting reading and rate (**Meter Settings**), or enter an amount directly when there's no reading
+- Recurring bills: tick **Repeat every month** and an unpaid copy is added at the start of each month
 - Mark bills as paid or unpaid, with due dates, payment dates and notes. Overdue bills are flagged
-- Dashboard totals (in ₹), plus this month vs last month
-- Monthly summary by category, with optional monthly budgets that warn at 80% and when you go over
-- Search and filter bills by period, category and status, and download them as CSV
+- Totals for all bills: count, amount, paid, unpaid and overdue
+- Search and filter by period, type and status, and download the result as CSV
+
+### 📈 Investments
+
+- Bills in the **Investments / SIP** type get their own table instead of appearing under Bills
+- Totals for this month, this year and all time, plus the number of monthly SIPs
+- Investments are treated as money set aside, not spending, so they're left out of bill totals, the month comparison and the monthly summary
+
+### 💼 Income
+
+- Record salary and other income: bonus, freelance, rental, interest/dividends, or other
+- Each entry has an amount, the date received and optional notes
+- Filter by this month, this year or all time, with totals for all income and for salary alone
+
+### 🏷️ Types
+
+- A table of every bill type, showing its group, how many bills use it, and whether it's shown or hidden
+- **Add your own types** with a name, an emoji icon and a group. They appear in the bill form straight away
+- **Hide** types you don't use. They're left out of the bill form, the type filter and the budgets dialog. Bills that already use a hidden type still show it
+- **Delete** types you added. A type that's still used by bills can't be deleted, but it can be hidden. Built-in types can be hidden but not deleted
+- Filter the table by all / shown / hidden, and search by type or group name
+
+### Everywhere
+
+- Google sign-in
 - Preferred name used in the welcome message (click your name in the top bar to set it)
 - Light and dark mode: follows your system setting, or switch with the sun/moon button
+- Works on phones: tables turn into cards and the tabs scroll sideways
 
 ## Getting started
 
@@ -24,6 +58,7 @@ Built with React, TypeScript, Vite and Firebase (Authentication + Cloud Firestor
 - Node.js 20+
 - [pnpm](https://pnpm.io/)
 - A Firebase project with **Authentication** (Google provider enabled) and **Cloud Firestore**
+- The [Firebase CLI](https://firebase.google.com/docs/cli), to deploy the Firestore security rules
 
 ### Install
 
@@ -46,6 +81,16 @@ VITE_FIREBASE_APP_ID=
 
 You can find these values in the Firebase console under **Project settings → Your apps**. `.env` is git-ignored, so don't commit it.
 
+### Deploy the security rules
+
+The app won't be able to read or write data until the rules in [firestore.rules](firestore.rules) are deployed:
+
+```bash
+firebase deploy --only firestore:rules
+```
+
+Run this again whenever the rules change. For example, saving income needs the rule for the `income` collection.
+
 ### Run
 
 ```bash
@@ -67,36 +112,43 @@ Then open the URL Vite prints (usually http://localhost:5173).
 
 All data is stored per user in Firestore:
 
-| Path                                | What it holds                                   |
-| ----------------------------------- | ----------------------------------------------- |
-| `users/{userId}/bills/{billId}`     | One bill                                        |
-| `users/{userId}/settings/meters`    | Starting reading and rate for each meter        |
-| `users/{userId}/settings/budgets`   | Monthly budget per category, in ₹               |
-| `users/{userId}/settings/profile`   | `preferredName`                                 |
+| Path                                   | What it holds                                         |
+| -------------------------------------- | ----------------------------------------------------- |
+| `users/{userId}/bills/{billId}`        | One bill (investments are bills too)                  |
+| `users/{userId}/income/{incomeId}`     | One salary or other income entry                      |
+| `users/{userId}/settings/meters`       | Starting reading and rate for each meter              |
+| `users/{userId}/settings/budgets`      | Monthly budget per type, in ₹                         |
+| `users/{userId}/settings/categories`   | Your own types (`custom`) and hidden types (`hidden`) |
+| `users/{userId}/settings/profile`      | `preferredName`                                       |
 
-Each bill has a `category`, `billingDate`, `amount` and `status` (`paid` / `unpaid`). The other fields are optional: meter readings, `consumption`, `unit`, `rate`, `dueDate`, `paymentDate`, `notes` and the recurring fields. See [src/types/bill.ts](src/types/bill.ts) for the full types.
+- **Bill:** `category`, `billingDate`, `amount` and `status` (`paid` / `unpaid`). Optional fields: meter readings, `consumption`, `unit`, `rate`, `dueDate`, `paymentDate`, `notes` and the recurring fields. `category` is either a built-in type (such as `water` or `investments`) or the id of one of your own types (`custom-…`).
+- **Income:** `source` (`salary`, `bonus`, `freelance`, `rental`, `interest`, `other`), `amount`, `date` and optional `notes`.
+- **Types:** each entry in `custom` has an `id`, `label`, `icon` and `group` (the name of the group it's listed under). `hidden` is a list of type ids.
 
-[firestore.rules](firestore.rules) only lets a signed-in user read and write their own data. After changing it, deploy with:
+See [src/types/bill.ts](src/types/bill.ts) for the full types.
 
-```bash
-firebase deploy --only firestore:rules
-```
+[firestore.rules](firestore.rules) only lets a signed-in user read and write their own data.
 
 ## Project structure
 
 ```
 src/
-  components/   Bill form and table, dialogs (meters, budgets, profile),
+  components/   Bill form and table, income form and table, type form
+                and table, dialogs (meters, budgets, profile), overview
                 summaries, theme toggle, credits footer
-  context/      Auth context and provider
-  lib/          Firebase and Firestore setup, categories, dates, theme
-  pages/        Login and Dashboard
-  services/     Auth, bills, recurring bills, bill calculations,
-                meter settings, budgets, profile
+  context/      Auth context, and the types context that combines
+                built-in and your own types
+  lib/          Firebase and Firestore setup, categories (types),
+                income sources, dates, theme
+  pages/        Login and Dashboard (with its tabs)
+  services/     Auth, bills, recurring bills, bill calculations, income,
+                types, meter settings, budgets, profile
   types/        Shared TypeScript types
 ```
 
 The Login and Dashboard pages are loaded on demand, and Firestore is set up in its own file ([src/lib/firestore.ts](src/lib/firestore.ts)), so the login page doesn't download the Firestore SDK.
+
+Components get the list of types from `useCategories()` ([src/context/useCategories.ts](src/context/useCategories.ts)), not straight from `categoryConfig`. That way your own types and hidden types are included. The list is built by `buildCategoryCatalog()` in [src/lib/categories.ts](src/lib/categories.ts).
 
 ## Theming
 
@@ -107,7 +159,9 @@ Colors are defined so they work in both light and dark mode:
 
 When adding styles, use one of these. A plain color like `#ffffff` will look the same in both themes. The chosen theme is saved in the browser's local storage.
 
-## Adding a bill category
+## Adding a built-in bill type
+
+You can add your own types from the **Types** tab without changing any code. To add a type that every user gets:
 
 1. Add the new value to `BillCategory` in [src/types/bill.ts](src/types/bill.ts).
 2. Add its label, icon and description to `categoryConfig` in [src/lib/categories.ts](src/lib/categories.ts), and add it to one of the `categoryGroups` there.

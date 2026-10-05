@@ -973,3 +973,7 @@
     padding: 44px 18px;
   }
 }
+
+.bill-category-badge.income {
+  background: light-dark(#e8f8ee, #143a26);
+}

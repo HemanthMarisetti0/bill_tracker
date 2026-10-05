@@ -341,6 +341,112 @@
 }
 
 /* =========================
+   TABS
+========================= */
+
+.dashboard-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 28px;
+  padding: 4px;
+  overflow-x: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  scrollbar-width: none;
+}
+
+.dashboard-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.dashboard-tabs button {
+  display: inline-flex;
+  flex: 1 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  height: 40px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.dashboard-tabs button:hover {
+  background: var(--surface-muted);
+  color: var(--text);
+}
+
+.dashboard-tabs button.active {
+  background: light-dark(#eef4ff, #132139);
+  color: light-dark(#2563eb, #7ea2f0);
+}
+
+/* =========================
+   CASH FLOW
+========================= */
+
+.cashflow-prompt {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 18px;
+  padding: 18px 22px;
+  background: light-dark(#f5f9ff, #131d2e);
+  border: 1px dashed light-dark(#b9cdf5, #2e416c);
+  border-radius: 14px;
+}
+
+.cashflow-prompt-icon {
+  font-size: 26px;
+}
+
+.cashflow-prompt > div {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.cashflow-prompt strong {
+  font-size: 15px;
+  color: var(--text);
+}
+
+.cashflow-prompt span {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.cashflow-card.income .stat-value {
+  color: light-dark(#1d8a50, #75e2a8);
+}
+
+.cashflow-card.invested .stat-value {
+  color: light-dark(#7c3aed, #a78bfa);
+}
+
+.cashflow-card.positive {
+  border-color: light-dark(#bfe6cf, #1f4a33);
+}
+
+.cashflow-card.negative {
+  border-color: light-dark(#f0c4c1, #5a2a26);
+}
+
+.cashflow-card.negative .stat-value {
+  color: light-dark(#c0392b, #dd7469);
+}
+
+/* =========================
    MOBILE
 ========================= */
 
@@ -455,6 +561,24 @@
 
   .dashboard-bills-section {
     border-radius: 12px;
+  }
+
+  .dashboard-tabs {
+    margin-bottom: 20px;
+  }
+
+  .dashboard-tabs button {
+    padding: 0 12px;
+    font-size: 13px;
+  }
+
+  .cashflow-prompt {
+    flex-wrap: wrap;
+    padding: 16px;
+  }
+
+  .cashflow-prompt .add-bill-button {
+    width: 100%;
   }
 
   .section-header {

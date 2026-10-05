@@ -11,25 +11,20 @@ import { collection, getDocs, orderBy, query } from "firebase/firestore";
 
 import { db } from "../lib/firestore";
 import { useAuth } from "../context/useAuth";
+import { useCategories } from "../context/useCategories";
 
 import {
   calculateAmount,
   calculateConsumption,
 } from "../services/billCalculator";
 import { getMeterSetting } from "../services/meterSettingsService";
-import {
-  categoryConfig,
-  categoryGroups,
-  getCategoryGroup,
-  isMeterCategory,
-  meterCategories,
-} from "../lib/categories";
+import { isMeterCategory, meterCategories } from "../lib/categories";
 import { getToday } from "../lib/dates";
 
 import type {
   Bill,
-  BillCategory,
   BillStatus,
+  CategoryId,
   MeterSettings,
 } from "../types/bill";
 
@@ -44,10 +39,18 @@ interface BillFormProps {
   editingBill?: Bill | null;
   meterSettings: MeterSettings;
   onCustomizeMeters: () => void;
+  /*
+   * Category selected when
+   * adding a new bill.
+   */
+  defaultCategory?: CategoryId;
 }
 
-function getInitialCategory(editingBill?: Bill | null): BillCategory {
-  return editingBill?.category ?? "water";
+function getInitialCategory(
+  editingBill?: Bill | null,
+  defaultCategory: CategoryId = "water",
+): CategoryId {
+  return editingBill?.category ?? defaultCategory;
 }
 
 function getInitialBillingDate(editingBill?: Bill | null): string {
@@ -117,13 +120,16 @@ export default function BillForm({
   editingBill = null,
   meterSettings,
   onCustomizeMeters,
+  defaultCategory,
 }: BillFormProps) {
   const { user } = useAuth();
 
+  const catalog = useCategories();
+
   const dialogRef = useRef<HTMLDialogElement>(null);
 
-  const [category, setCategory] = useState<BillCategory>(
-    getInitialCategory(editingBill),
+  const [category, setCategory] = useState<CategoryId>(
+    getInitialCategory(editingBill, defaultCategory),
   );
 
   /*
@@ -131,7 +137,8 @@ export default function BillForm({
    * Starts on the selected category's group.
    */
   const [openGroup, setOpenGroup] = useState<string | null>(
-    () => getCategoryGroup(getInitialCategory(editingBill)).label,
+    () =>
+      catalog.getGroup(getInitialCategory(editingBill, defaultCategory)).label,
   );
 
   const [billingDate, setBillingDate] = useState<string>(
@@ -185,7 +192,20 @@ export default function BillForm({
 
   const isEditing = Boolean(editingBill);
 
-  const config = categoryConfig[category];
+  const config = catalog.getConfig(category);
+
+  /*
+   * Hidden types stay out of the picker,
+   * unless the bill already uses one.
+   */
+  const pickerGroups = catalog.groups
+    .map((group) => ({
+      ...group,
+      categories: group.categories.filter(
+        (item) => item === category || !catalog.isHidden(item),
+      ),
+    }))
+    .filter((group) => group.categories.length > 0);
 
   const isMeterBased = config.meterBased;
 
@@ -352,7 +372,7 @@ export default function BillForm({
   /*
    * Category change.
    */
-  function handleCategoryChange(newCategory: BillCategory) {
+  function handleCategoryChange(newCategory: CategoryId) {
     setCategory(newCategory);
 
     setCurrentReading("");
@@ -538,7 +558,7 @@ ${message}`,
             <div className="bill-form-section-title">Bill Category</div>
 
             <div className="bill-category-accordion">
-              {categoryGroups.map((group) => {
+              {pickerGroups.map((group) => {
                 const isOpen = openGroup === group.label;
 
                 const hasSelected = group.categories.includes(category);
@@ -581,7 +601,7 @@ ${message}`,
                     {isOpen && (
                       <div id={panelId} className="bill-category-grid">
                         {group.categories.map((item) => {
-                          const itemConfig = categoryConfig[item];
+                          const itemConfig = catalog.getConfig(item);
 
                           return (
                             <button

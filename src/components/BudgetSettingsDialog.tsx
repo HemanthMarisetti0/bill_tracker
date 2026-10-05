@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, type FormEvent, type MouseEvent } from "react";
 
-import { categories, categoryConfig } from "../lib/categories";
+import { useCategories } from "../context/useCategories";
 
-import type { BillCategory, Budgets } from "../types/bill";
+import type { Budgets, CategoryId } from "../types/bill";
 
 import "./BillForm.css";
 
@@ -13,10 +13,10 @@ interface BudgetSettingsDialogProps {
   onSave: (budgets: Budgets) => Promise<void>;
 }
 
-type BudgetInputs = Record<BillCategory, string>;
+type BudgetInputs = Partial<Record<CategoryId, string>>;
 
-function toInputs(budgets: Budgets): BudgetInputs {
-  const inputs = {} as BudgetInputs;
+function toInputs(budgets: Budgets, categories: CategoryId[]): BudgetInputs {
+  const inputs: BudgetInputs = {};
 
   for (const category of categories) {
     inputs[category] = budgets[category]?.toString() ?? "";
@@ -33,7 +33,19 @@ export default function BudgetSettingsDialog({
 }: BudgetSettingsDialogProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
-  const [inputs, setInputs] = useState<BudgetInputs>(() => toInputs(budgets));
+  const catalog = useCategories();
+
+  /*
+   * Hidden types keep any budget
+   * they had, but aren't listed.
+   */
+  const categories = catalog.all.filter(
+    (category) => !catalog.isHidden(category) || budgets[category],
+  );
+
+  const [inputs, setInputs] = useState<BudgetInputs>(() =>
+    toInputs(budgets, categories),
+  );
 
   const [saving, setSaving] = useState(false);
 
@@ -68,7 +80,7 @@ export default function BudgetSettingsDialog({
     const newBudgets: Budgets = {};
 
     for (const category of categories) {
-      const input = inputs[category].trim();
+      const input = (inputs[category] ?? "").trim();
 
       /*
        * Empty means no budget for
@@ -82,7 +94,7 @@ export default function BudgetSettingsDialog({
 
       if (!Number.isFinite(value) || value < 0) {
         alert(
-          `Please enter a valid ${categoryConfig[category].label.toLowerCase()} budget.`,
+          `Please enter a valid ${catalog.getConfig(category).label.toLowerCase()} budget.`,
         );
 
         return;
@@ -145,7 +157,7 @@ ${message}`);
           <section className="bill-form-section">
             <div className="bill-form-grid">
               {categories.map((category) => {
-                const config = categoryConfig[category];
+                const config = catalog.getConfig(category);
 
                 return (
                   <label key={category} className="bill-field">
@@ -158,7 +170,7 @@ ${message}`);
                         type="number"
                         min="0"
                         step="any"
-                        value={inputs[category]}
+                        value={inputs[category] ?? ""}
                         onChange={(event) =>
                           setInputs((current) => ({
                             ...current,
