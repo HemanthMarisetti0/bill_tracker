@@ -518,6 +518,10 @@
   background: light-dark(#e6f6ef, #17402e);
 }
 
+.bill-category-badge.savings {
+  background: light-dark(#fdeef4, #3d1a2a);
+}
+
 .bill-category-badge.taxes {
   background: light-dark(#f1f1f1, #2a2a2a);
 }

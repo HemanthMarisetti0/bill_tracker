@@ -115,6 +115,13 @@ export const categoryConfig: Record<BillCategory, CategoryConfig> = {
     meterBased: false,
   },
 
+  savings: {
+    label: "Savings",
+    icon: "🐷",
+    description: "Track money put into savings, FDs and emergency funds",
+    meterBased: false,
+  },
+
   taxes: {
     label: "Taxes",
     icon: "🏛️",
@@ -336,6 +343,7 @@ export const categoryGroups: CategoryGroup[] = [
       "education",
       "credit-card",
       "investments",
+      "savings",
       "taxes",
       "assets",
       "donations",
@@ -391,6 +399,19 @@ export function isMeterCategory(
 }
 
 export const INVESTMENT_CATEGORY: BillCategory = "investments";
+
+/*
+ * Money set aside rather than spent;
+ * listed on the Investments tab.
+ */
+export const investmentCategories: CategoryId[] = [
+  INVESTMENT_CATEGORY,
+  "savings",
+];
+
+export function isInvestmentCategory(category: CategoryId) {
+  return investmentCategories.includes(category);
+}
 
 export function isBuiltInCategory(category: CategoryId): category is BillCategory {
   return Object.hasOwn(categoryConfig, category);

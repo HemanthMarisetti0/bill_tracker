@@ -5,7 +5,11 @@ import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import { useAuth } from "../context/useAuth";
 import { CategoriesContext } from "../context/CategoriesContext";
 import { db } from "../lib/firestore";
-import { buildCategoryCatalog, INVESTMENT_CATEGORY } from "../lib/categories";
+import {
+  buildCategoryCatalog,
+  INVESTMENT_CATEGORY,
+  isInvestmentCategory,
+} from "../lib/categories";
 
 import { logout } from "../services/authService";
 import { addBill, deleteBill, updateBill } from "../services/billService";
@@ -570,16 +574,16 @@ export default function Dashboard() {
   }
 
   /*
-   * Investments are money set aside,
+   * Investments and savings are money set aside,
    * so they're kept out of spending.
    */
   const expenseBills = useMemo(
-    () => bills.filter((bill) => bill.category !== INVESTMENT_CATEGORY),
+    () => bills.filter((bill) => !isInvestmentCategory(bill.category)),
     [bills],
   );
 
   const investmentBills = useMemo(
-    () => bills.filter((bill) => bill.category === INVESTMENT_CATEGORY),
+    () => bills.filter((bill) => isInvestmentCategory(bill.category)),
     [bills],
   );
 
@@ -850,8 +854,8 @@ export default function Dashboard() {
                       <h3>Your Bills</h3>
 
                       <p>
-                        View and manage your recent bills. Investments have
-                        their own tab.
+                        View and manage your recent bills. Investments and
+                        savings have their own tab.
                       </p>
                     </div>
                   </div>
@@ -926,7 +930,10 @@ export default function Dashboard() {
                     <div>
                       <h3>Your Investments</h3>
 
-                      <p>SIPs, RDs, PPF and other money you've set aside.</p>
+                      <p>
+                        SIPs, RDs, PPF, savings and other money you've set
+                        aside.
+                      </p>
                     </div>
                   </div>
 
@@ -940,7 +947,7 @@ export default function Dashboard() {
                       hideCategoryFilter
                       emptyIcon="📈"
                       emptyTitle="No investments yet"
-                      emptyMessage="Add a SIP, RD or any other investment to track it here."
+                      emptyMessage="Add a SIP, RD, savings or any other investment to track it here."
                     />
                   )}
                 </section>

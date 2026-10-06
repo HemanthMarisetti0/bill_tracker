@@ -16,6 +16,7 @@ export type BillCategory =
   | "education"
   | "credit-card"
   | "investments"
+  | "savings"
   | "taxes"
   | "donations"
   | "assets"
