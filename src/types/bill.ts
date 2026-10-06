@@ -47,6 +47,16 @@ export type BillCategory =
 
 export type BillStatus = "paid" | "unpaid";
 
+export type PaymentMethod =
+  | "upi"
+  | "credit-card"
+  | "debit-card"
+  | "net-banking"
+  | "auto-debit"
+  | "cash"
+  | "wallet"
+  | "other";
+
 /*
  * A built-in category, or the id of a
  * type the user added themselves.
@@ -75,6 +85,12 @@ export interface Bill {
   status: BillStatus;
 
   paymentDate?: string;
+
+  /*
+   * How the bill was or will be paid,
+   * e.g. UPI or auto-debit.
+   */
+  paymentMethod?: PaymentMethod;
 
   dueDate?: string;
 

@@ -400,18 +400,7 @@ export function isMeterCategory(
 
 export const INVESTMENT_CATEGORY: BillCategory = "investments";
 
-/*
- * Money set aside rather than spent;
- * listed on the Investments tab.
- */
-export const investmentCategories: CategoryId[] = [
-  INVESTMENT_CATEGORY,
-  "savings",
-];
-
-export function isInvestmentCategory(category: CategoryId) {
-  return investmentCategories.includes(category);
-}
+export const SAVINGS_CATEGORY: BillCategory = "savings";
 
 export function isBuiltInCategory(category: CategoryId): category is BillCategory {
   return Object.hasOwn(categoryConfig, category);

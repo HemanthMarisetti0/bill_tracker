@@ -193,12 +193,12 @@ export default function MonthlySummary({
           </span>
 
           <span>
-            <h3>Monthly Summary</h3>
+            <h3>Where your money went</h3>
 
             <p>
               {collapsed
                 ? `${formatMonth(month)} · ${formatCurrency(totalSpent)} spent`
-                : "Where your money went. Tap a category to see its bills."}
+                : "Bills by type for the month. Tap a type to see its bills; the line on a bar is its budget."}
             </p>
           </span>
         </button>

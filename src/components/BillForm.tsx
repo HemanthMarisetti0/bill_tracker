@@ -20,12 +20,14 @@ import {
 import { getMeterSetting } from "../services/meterSettingsService";
 import { isMeterCategory, meterCategories } from "../lib/categories";
 import { getToday } from "../lib/dates";
+import { paymentMethodConfig, paymentMethods } from "../lib/paymentMethods";
 
 import type {
   Bill,
   BillStatus,
   CategoryId,
   MeterSettings,
+  PaymentMethod,
 } from "../types/bill";
 
 import ChevronIcon from "./ChevronIcon";
@@ -101,6 +103,12 @@ function getInitialPaymentDate(editingBill?: Bill | null): string {
   return editingBill?.paymentDate ?? getToday();
 }
 
+function getInitialPaymentMethod(
+  editingBill?: Bill | null,
+): PaymentMethod | "" {
+  return editingBill?.paymentMethod ?? "";
+}
+
 function getInitialNotes(editingBill?: Bill | null): string {
   return editingBill?.notes ?? "";
 }
@@ -174,6 +182,10 @@ export default function BillForm({
 
   const [paymentDate, setPaymentDate] = useState<string>(
     getInitialPaymentDate(editingBill),
+  );
+
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | "">(
+    getInitialPaymentMethod(editingBill),
   );
 
   const [notes, setNotes] = useState<string>(getInitialNotes(editingBill));
@@ -477,6 +489,8 @@ export default function BillForm({
         status,
 
         paymentDate: status === "paid" ? paymentDate : undefined,
+
+        paymentMethod: paymentMethod || undefined,
 
         dueDate: dueDate || undefined,
 
@@ -847,6 +861,27 @@ ${message}`,
                     />
                   </label>
                 )}
+
+                <label className="bill-field">
+                  <span>Payment Method (optional)</span>
+
+                  <select
+                    value={paymentMethod}
+                    onChange={(event) =>
+                      setPaymentMethod(event.target.value as PaymentMethod | "")
+                    }>
+                    <option value="">Not set</option>
+
+                    {paymentMethods.map((item) => (
+                      <option key={item} value={item}>
+                        {paymentMethodConfig[item].icon}{" "}
+                        {paymentMethodConfig[item].label}
+                      </option>
+                    ))}
+                  </select>
+
+                  <small>How it was paid, or how it will be paid.</small>
+                </label>
 
                 <label className="bill-field">
                   <span>Due Date (optional)</span>

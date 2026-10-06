@@ -426,12 +426,143 @@
   color: var(--text-muted);
 }
 
+/*
+ * Title above each
+ * Overview block.
+ */
+.overview-heading {
+  margin-bottom: 14px;
+}
+
+.overview-heading h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.overview-heading p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.cashflow {
+  margin-bottom: 32px;
+}
+
+.cashflow .dashboard-stats {
+  margin-bottom: 0;
+}
+
+.stat-hint {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-subtle);
+}
+
+.cashflow-breakdown {
+  margin-top: 18px;
+  padding: 18px 22px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+.cashflow-sentence {
+  margin: 0 0 14px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.cashflow-sentence strong {
+  color: var(--text);
+}
+
+.cashflow-sentence .cashflow-left {
+  color: light-dark(#1d8a50, #75e2a8);
+}
+
+.cashflow-sentence .cashflow-over {
+  color: light-dark(#c0392b, #dd7469);
+}
+
+.cashflow-bar {
+  display: flex;
+  height: 14px;
+  overflow: hidden;
+  background: var(--surface-muted);
+  border-radius: 999px;
+}
+
+.cashflow-bar-part + .cashflow-bar-part {
+  border-left: 2px solid var(--surface);
+}
+
+.cashflow-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.cashflow-legend li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cashflow-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.cashflow-bar-part.spent,
+.cashflow-legend-dot.spent {
+  background: light-dark(#2563eb, #7ea2f0);
+}
+
+.cashflow-bar-part.invested,
+.cashflow-legend-dot.invested {
+  background: light-dark(#7c3aed, #a78bfa);
+}
+
+.cashflow-bar-part.saved,
+.cashflow-legend-dot.saved {
+  background: light-dark(#0e7490, #67e8f9);
+}
+
+.cashflow-bar-part.left,
+.cashflow-legend-dot.left {
+  background: light-dark(#1d8a50, #75e2a8);
+}
+
 .cashflow-card.income .stat-value {
   color: light-dark(#1d8a50, #75e2a8);
 }
 
 .cashflow-card.invested .stat-value {
   color: light-dark(#7c3aed, #a78bfa);
+}
+
+.cashflow-card.saved .stat-value {
+  color: light-dark(#0e7490, #67e8f9);
+}
+
+/*
+ * Five cash flow cards
+ * fit in one row on wide screens.
+ */
+@media (min-width: 901px) {
+  .cashflow .dashboard-stats {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
 }
 
 .cashflow-card.positive {

@@ -1,19 +1,22 @@
 # Bill Tracker
 
-A web app for tracking household bills, salary and investments. Sign in with Google, log bills by type, record your salary, and see what's paid, what's still due, and how much is left each month.
+A web app for tracking household bills, salary, investments and savings. Sign in with Google, log bills by type, record your salary, and see what's paid, what's still due, and how much is left each month.
 
 Built with React, TypeScript, Vite and Firebase (Authentication + Cloud Firestore).
 
 ## Features
 
-The dashboard is split into five tabs.
+The dashboard is split into six tabs.
 
 ### 📊 Overview
 
-- This month's **Income**, **Spent on bills**, **Invested** and **Left this month**
+Each block has a heading and a short line explaining what it shows.
+
+- **Your money this month:** **Income**, **Spent on bills**, **Invested**, **Saved** and **Left this month**, each with a hint saying what it counts
+- A plain-English line such as *"Out of ₹50,000 income, you spent ₹22,000 on bills, invested ₹10,000 and saved ₹5,000. ₹13,000 (26%) is still left."*, plus a colored bar and legend showing what share of income went to bills, investments, savings and what's left
 - A reminder to **add this month's salary** if you haven't yet
-- This month vs last month, with how much you saved or overspent
-- Monthly summary by type, with optional monthly budgets that warn at 80% and when you go over. Click a type to see its bills
+- **Bills: this month vs last month**, showing whether you're spending more or less on bills than last month. Investments and savings aren't counted
+- **Where your money went:** spending by type for any month, with optional monthly budgets that warn at 80% and when you go over. Click a type to see its bills
 
 ### 🧾 Bills
 
@@ -21,14 +24,21 @@ The dashboard is split into five tabs.
 - Meter-based bills (Water, Electricity, Gas) take previous and current readings plus a rate and work out consumption and amount for you. You can set each meter's starting reading and rate (**Meter Settings**), or enter an amount directly when there's no reading
 - Recurring bills: tick **Repeat every month** and an unpaid copy is added at the start of each month
 - Mark bills as paid or unpaid, with due dates, payment dates and notes. Overdue bills are flagged
+- Optional **payment method**: UPI, credit card, debit card, net banking, auto-debit, cash, wallet or other. It's shown under the bill's status, and monthly copies of a recurring bill keep it
 - Totals for all bills: count, amount, paid, unpaid and overdue
-- Search and filter by period, type and status, and download the result as CSV
+- Search and filter by period, type, status and payment method, and download the result as CSV
 
 ### 📈 Investments
 
 - Bills in the **Investments / SIP** type get their own table instead of appearing under Bills
 - Totals for this month, this year and all time, plus the number of monthly SIPs
 - Investments are treated as money set aside, not spending, so they're left out of bill totals, the month comparison and the monthly summary
+
+### 🐷 Savings
+
+- Bills in the **Savings** type (money put into savings, FDs or an emergency fund) get their own tab, separate from investments
+- Totals for this month, this year and all time, plus the number of monthly savings entries
+- Like investments, savings are left out of spending. On the Overview they're shown as **Saved**
 
 ### 💼 Income
 
@@ -114,14 +124,14 @@ All data is stored per user in Firestore:
 
 | Path                                   | What it holds                                         |
 | -------------------------------------- | ----------------------------------------------------- |
-| `users/{userId}/bills/{billId}`        | One bill (investments are bills too)                  |
+| `users/{userId}/bills/{billId}`        | One bill (investments and savings are bills too)      |
 | `users/{userId}/income/{incomeId}`     | One salary or other income entry                      |
 | `users/{userId}/settings/meters`       | Starting reading and rate for each meter              |
 | `users/{userId}/settings/budgets`      | Monthly budget per type, in ₹                         |
 | `users/{userId}/settings/categories`   | Your own types (`custom`) and hidden types (`hidden`) |
 | `users/{userId}/settings/profile`      | `preferredName`                                       |
 
-- **Bill:** `category`, `billingDate`, `amount` and `status` (`paid` / `unpaid`). Optional fields: meter readings, `consumption`, `unit`, `rate`, `dueDate`, `paymentDate`, `notes` and the recurring fields. `category` is either a built-in type (such as `water` or `investments`) or the id of one of your own types (`custom-…`).
+- **Bill:** `category`, `billingDate`, `amount` and `status` (`paid` / `unpaid`). Optional fields: meter readings, `consumption`, `unit`, `rate`, `dueDate`, `paymentDate`, `paymentMethod` (`upi`, `credit-card`, `debit-card`, `net-banking`, `auto-debit`, `cash`, `wallet`, `other`), `notes` and the recurring fields. `category` is either a built-in type (such as `water`, `investments` or `savings`) or the id of one of your own types (`custom-…`).
 - **Income:** `source` (`salary`, `bonus`, `freelance`, `rental`, `interest`, `other`), `amount`, `date` and optional `notes`.
 - **Types:** each entry in `custom` has an `id`, `label`, `icon` and `group` (the name of the group it's listed under). `hidden` is a list of type ids.
 
@@ -139,7 +149,7 @@ src/
   context/      Auth context, and the types context that combines
                 built-in and your own types
   lib/          Firebase and Firestore setup, categories (types),
-                income sources, dates, theme
+                income sources, payment methods, dates, theme
   pages/        Login and Dashboard (with its tabs)
   services/     Auth, bills, recurring bills, bill calculations, income,
                 types, meter settings, budgets, profile

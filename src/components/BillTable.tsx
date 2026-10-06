@@ -3,8 +3,14 @@ import { useMemo, useState } from "react";
 import { useCategories } from "../context/useCategories";
 import type { CategoryCatalog } from "../lib/categories";
 import { getToday, isOverdue, toDateString } from "../lib/dates";
+import { paymentMethodConfig, paymentMethods } from "../lib/paymentMethods";
 
-import type { Bill, BillStatus, CategoryId } from "../types/bill";
+import type {
+  Bill,
+  BillStatus,
+  CategoryId,
+  PaymentMethod,
+} from "../types/bill";
 
 import "./BillTable.css";
 
@@ -25,6 +31,8 @@ interface BillTableProps {
 type Period = "this-month" | "last-month" | "all" | "custom";
 
 type StatusFilter = BillStatus | "overdue" | "all";
+
+type MethodFilter = PaymentMethod | "none" | "all";
 
 interface DateRange {
   from: string;
@@ -123,6 +131,7 @@ function downloadBillsAsCsv(
     "Amount",
     "Status",
     "Payment Date",
+    "Payment Method",
     "Due Date",
     "Recurring",
     "Notes",
@@ -139,6 +148,7 @@ function downloadBillsAsCsv(
     Number(bill.amount || 0).toFixed(2),
     bill.status.toUpperCase(),
     bill.paymentDate ?? "",
+    bill.paymentMethod ? paymentMethodConfig[bill.paymentMethod].label : "",
     bill.dueDate ?? "",
     bill.recurring ? "Monthly" : "",
     bill.notes ?? "",
@@ -188,6 +198,8 @@ export default function BillTable({
 
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
 
+  const [methodFilter, setMethodFilter] = useState<MethodFilter>("all");
+
   const [search, setSearch] = useState("");
 
   /*
@@ -220,6 +232,10 @@ export default function BillTable({
           ? isOverdue(bill, today)
           : bill.status === statusFilter);
 
+      const matchesMethod =
+        methodFilter === "all" ||
+        (bill.paymentMethod ?? "none") === methodFilter;
+
       const matchesSearch =
         !searchValue ||
         catalog
@@ -227,11 +243,30 @@ export default function BillTable({
           .label.toLowerCase()
           .includes(searchValue) ||
         bill.billingDate.toLowerCase().includes(searchValue) ||
-        bill.notes?.toLowerCase().includes(searchValue);
+        bill.notes?.toLowerCase().includes(searchValue) ||
+        (bill.paymentMethod &&
+          paymentMethodConfig[bill.paymentMethod].label
+            .toLowerCase()
+            .includes(searchValue));
 
-      return matchesDate && matchesCategory && matchesStatus && matchesSearch;
+      return (
+        matchesDate &&
+        matchesCategory &&
+        matchesStatus &&
+        matchesMethod &&
+        matchesSearch
+      );
     });
-  }, [bills, dateRange, categoryFilter, statusFilter, search, today, catalog]);
+  }, [
+    bills,
+    dateRange,
+    categoryFilter,
+    statusFilter,
+    methodFilter,
+    search,
+    today,
+    catalog,
+  ]);
 
   /*
    * Hidden types are only offered
@@ -289,6 +324,7 @@ export default function BillTable({
   function clearFilters() {
     setCategoryFilter("all");
     setStatusFilter("all");
+    setMethodFilter("all");
     setSearch("");
     selectPeriod("this-month");
   }
@@ -305,6 +341,7 @@ export default function BillTable({
     period !== "this-month" ||
     categoryFilter !== "all" ||
     statusFilter !== "all" ||
+    methodFilter !== "all" ||
     search.trim() !== "";
 
   const periodLabel = getPeriodLabel(period, dateRange);
@@ -386,7 +423,7 @@ export default function BillTable({
 
           <input
             type="text"
-            placeholder="Search by category, date or notes..."
+            placeholder="Search by category, date, notes or payment method..."
             value={search}
             onChange={(event) => setSearch(event.target.value)}
           />
@@ -418,6 +455,25 @@ export default function BillTable({
             <option value="paid">Paid</option>
             <option value="unpaid">Unpaid</option>
             <option value="overdue">Overdue</option>
+          </select>
+        </div>
+
+        <div className="bill-filter-select">
+          <select
+            value={methodFilter}
+            onChange={(event) =>
+              setMethodFilter(event.target.value as MethodFilter)
+            }
+            aria-label="Payment method">
+            <option value="all">All Methods</option>
+
+            {paymentMethods.map((item) => (
+              <option key={item} value={item}>
+                {paymentMethodConfig[item].label}
+              </option>
+            ))}
+
+            <option value="none">Not set</option>
           </select>
         </div>
 
@@ -483,6 +539,7 @@ export default function BillTable({
               onClick={() => {
                 setCategoryFilter("all");
                 setStatusFilter("all");
+                setMethodFilter("all");
                 setSearch("");
               }}>
               Clear filters
@@ -602,13 +659,23 @@ export default function BillTable({
                     </td>
 
                     <td data-label="Status">
-                      {isOverdue(bill, today) ? (
-                        <span className="status overdue">Overdue</span>
-                      ) : (
-                        <span className={`status ${bill.status}`}>
-                          {bill.status === "paid" ? "Paid" : "Unpaid"}
-                        </span>
-                      )}
+                      <div>
+                        {isOverdue(bill, today) ? (
+                          <span className="status overdue">Overdue</span>
+                        ) : (
+                          <span className={`status ${bill.status}`}>
+                            {bill.status === "paid" ? "Paid" : "Unpaid"}
+                          </span>
+                        )}
+
+                        {bill.paymentMethod && (
+                          <span className="bill-subtext">
+                            {paymentMethodConfig[bill.paymentMethod].icon}{" "}
+                            {bill.status === "paid" ? "via" : "by"}{" "}
+                            {paymentMethodConfig[bill.paymentMethod].label}
+                          </span>
+                        )}
+                      </div>
                     </td>
 
                     <td data-label="Actions" className="align-right">

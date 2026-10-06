@@ -73,6 +73,9 @@ export async function generateRecurringBills(userId: string, bills: Bill[]) {
         ...(template.dueDate
           ? { dueDate: addMonths(template.dueDate, offset) }
           : {}),
+        ...(template.paymentMethod
+          ? { paymentMethod: template.paymentMethod }
+          : {}),
         ...(template.notes ? { notes: template.notes } : {}),
         recurringSourceId: template.id,
         createdAt: serverTimestamp(),

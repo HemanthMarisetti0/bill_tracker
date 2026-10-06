@@ -8,7 +8,7 @@ import { db } from "../lib/firestore";
 import {
   buildCategoryCatalog,
   INVESTMENT_CATEGORY,
-  isInvestmentCategory,
+  SAVINGS_CATEGORY,
 } from "../lib/categories";
 
 import { logout } from "../services/authService";
@@ -61,12 +61,19 @@ import type {
 
 import "./Dashboard.css";
 
-type Tab = "overview" | "bills" | "investments" | "income" | "types";
+type Tab =
+  | "overview"
+  | "bills"
+  | "investments"
+  | "savings"
+  | "income"
+  | "types";
 
 const tabs: { id: Tab; label: string; icon: string }[] = [
   { id: "overview", label: "Overview", icon: "📊" },
   { id: "bills", label: "Bills", icon: "🧾" },
   { id: "investments", label: "Investments", icon: "📈" },
+  { id: "savings", label: "Savings", icon: "🐷" },
   { id: "income", label: "Income", icon: "💼" },
   { id: "types", label: "Types", icon: "🏷️" },
 ];
@@ -578,12 +585,22 @@ export default function Dashboard() {
    * so they're kept out of spending.
    */
   const expenseBills = useMemo(
-    () => bills.filter((bill) => !isInvestmentCategory(bill.category)),
+    () =>
+      bills.filter(
+        (bill) =>
+          bill.category !== INVESTMENT_CATEGORY &&
+          bill.category !== SAVINGS_CATEGORY,
+      ),
     [bills],
   );
 
   const investmentBills = useMemo(
-    () => bills.filter((bill) => isInvestmentCategory(bill.category)),
+    () => bills.filter((bill) => bill.category === INVESTMENT_CATEGORY),
+    [bills],
+  );
+
+  const savingsBills = useMemo(
+    () => bills.filter((bill) => bill.category === SAVINGS_CATEGORY),
     [bills],
   );
 
@@ -629,6 +646,23 @@ export default function Dashboard() {
     (bill) => bill.recurring,
   ).length;
 
+  /*
+   * Calculate savings totals.
+   */
+  const savedThisMonth = sumAmounts(
+    savingsBills.filter((bill) => toMonthKey(bill.billingDate) === currentMonth),
+  );
+
+  const savedThisYear = sumAmounts(
+    savingsBills.filter(
+      (bill) => bill.billingDate.slice(0, 4) === currentMonth.slice(0, 4),
+    ),
+  );
+
+  const savedTotal = sumAmounts(savingsBills);
+
+  const monthlySavings = savingsBills.filter((bill) => bill.recurring).length;
+
   if (!user) {
     return null;
   }
@@ -651,6 +685,10 @@ export default function Dashboard() {
     investments: {
       label: "+ Add Investment",
       onClick: () => handleAddBill(INVESTMENT_CATEGORY),
+    },
+    savings: {
+      label: "+ Add Savings",
+      onClick: () => handleAddBill(SAVINGS_CATEGORY),
     },
     income: { label: "+ Add Salary", onClick: handleAddIncome },
     types: { label: "+ Add Type", onClick: handleOpenCategoryForm },
@@ -774,6 +812,7 @@ export default function Dashboard() {
                 <CashflowSummary
                   expenses={expenseBills}
                   investments={investmentBills}
+                  savings={savingsBills}
                   income={income}
                   loading={loading || incomeLoading}
                   onAddSalary={handleAddIncome}
@@ -855,7 +894,7 @@ export default function Dashboard() {
 
                       <p>
                         View and manage your recent bills. Investments and
-                        savings have their own tab.
+                        savings have their own tabs.
                       </p>
                     </div>
                   </div>
@@ -930,10 +969,7 @@ export default function Dashboard() {
                     <div>
                       <h3>Your Investments</h3>
 
-                      <p>
-                        SIPs, RDs, PPF, savings and other money you've set
-                        aside.
-                      </p>
+                      <p>SIPs, RDs, PPF and other money you've invested.</p>
                     </div>
                   </div>
 
@@ -947,7 +983,83 @@ export default function Dashboard() {
                       hideCategoryFilter
                       emptyIcon="📈"
                       emptyTitle="No investments yet"
-                      emptyMessage="Add a SIP, RD, savings or any other investment to track it here."
+                      emptyMessage="Add a SIP, RD or any other investment to track it here."
+                    />
+                  )}
+                </section>
+              </>
+            )}
+
+            {activeTab === "savings" && (
+              <>
+                <section className="dashboard-stats">
+                  <div className="stat-card">
+                    <span className="stat-label">This Month</span>
+
+                    {loading ? (
+                      <span className="skeleton stat-skeleton" />
+                    ) : (
+                      <strong className="stat-value">
+                        {formatCurrency(savedThisMonth)}
+                      </strong>
+                    )}
+                  </div>
+
+                  <div className="stat-card">
+                    <span className="stat-label">This Year</span>
+
+                    {loading ? (
+                      <span className="skeleton stat-skeleton" />
+                    ) : (
+                      <strong className="stat-value">
+                        {formatCurrency(savedThisYear)}
+                      </strong>
+                    )}
+                  </div>
+
+                  <div className="stat-card">
+                    <span className="stat-label">Total Saved</span>
+
+                    {loading ? (
+                      <span className="skeleton stat-skeleton" />
+                    ) : (
+                      <strong className="stat-value">
+                        {formatCurrency(savedTotal)}
+                      </strong>
+                    )}
+                  </div>
+
+                  <div className="stat-card">
+                    <span className="stat-label">Monthly Savings</span>
+
+                    {loading ? (
+                      <span className="skeleton stat-skeleton" />
+                    ) : (
+                      <strong className="stat-value">{monthlySavings}</strong>
+                    )}
+                  </div>
+                </section>
+
+                <section className="dashboard-bills-section">
+                  <div className="section-header">
+                    <div>
+                      <h3>Your Savings</h3>
+
+                      <p>Money put into savings, FDs and emergency funds.</p>
+                    </div>
+                  </div>
+
+                  {loading ? (
+                    <Loader message="Loading your savings..." />
+                  ) : (
+                    <BillTable
+                      bills={savingsBills}
+                      onDelete={handleDeleteBill}
+                      onEdit={handleEditBill}
+                      hideCategoryFilter
+                      emptyIcon="🐷"
+                      emptyTitle="No savings yet"
+                      emptyMessage="Add money you've put into savings to track it here."
                     />
                   )}
                 </section>

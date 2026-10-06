@@ -65,91 +65,119 @@ export default function MonthComparison({
   const saved = previous.total - current.total;
 
   const savedPercent =
-    previous.total > 0 ? Math.round((Math.abs(saved) / previous.total) * 100) : 0;
+    previous.total > 0
+      ? Math.round((Math.abs(saved) / previous.total) * 100)
+      : 0;
 
   const usedOfLastMonth =
     previous.total > 0 ? (current.total / previous.total) * 100 : 0;
 
   const trend =
-    previous.total === 0 ? "none" : saved > 0 ? "saved" : saved < 0 ? "more" : "same";
+    previous.total === 0
+      ? "none"
+      : saved > 0
+        ? "saved"
+        : saved < 0
+          ? "more"
+          : "same";
 
   return (
-    <section className="month-comparison" aria-label="This month vs last month">
-      <div className="month-card">
-        <span className="month-card-label">
-          <span className="month-card-dot current" aria-hidden="true" />
-          This month · {formatMonth(currentMonth)}
-        </span>
+    <section aria-label="Bills this month vs last month">
+      <div className="overview-heading">
+        <h3>Bills: this month vs last month</h3>
 
-        {loading ? (
-          <span className="skeleton month-card-skeleton" />
-        ) : (
-          <strong className="month-card-value">
-            {formatCurrency(current.total)}
-          </strong>
-        )}
-
-        <span className="month-card-note">
-          {current.count} {current.count === 1 ? "bill" : "bills"} so far
-        </span>
+        <p>
+          Are you spending more or less on bills than last month? Investments
+          and savings aren't counted here.
+        </p>
       </div>
 
-      <div className="month-card">
-        <span className="month-card-label">
-          <span className="month-card-dot previous" aria-hidden="true" />
-          Last month · {formatMonth(lastMonth)}
-        </span>
+      <div className="month-comparison">
+        <div className="month-card">
+          <span className="month-card-label">
+            <span className="month-card-dot current" aria-hidden="true" />
+            Bills this month · {formatMonth(currentMonth)}
+          </span>
 
-        {loading ? (
-          <span className="skeleton month-card-skeleton" />
-        ) : (
-          <strong className="month-card-value">
-            {formatCurrency(previous.total)}
-          </strong>
-        )}
+          {loading ? (
+            <span className="skeleton month-card-skeleton" />
+          ) : (
+            <strong className="month-card-value">
+              {formatCurrency(current.total)}
+            </strong>
+          )}
 
-        <span className="month-card-note">
-          {previous.count} {previous.count === 1 ? "bill" : "bills"}
-        </span>
-      </div>
+          <span className="month-card-note">
+            {current.count} {current.count === 1 ? "bill" : "bills"} so far
+          </span>
+        </div>
 
-      <div className={`month-card month-card-savings ${loading ? "" : trend}`}>
-        <span className="month-card-label">
-          {trend === "more" ? "Spent more than last month" : "Saved vs last month"}
-        </span>
+        <div className="month-card">
+          <span className="month-card-label">
+            <span className="month-card-dot previous" aria-hidden="true" />
+            Bills last month · {formatMonth(lastMonth)}
+          </span>
 
-        {loading ? (
-          <span className="skeleton month-card-skeleton" />
-        ) : (
-          <strong className="month-card-value">
-            {trend === "none" ? "—" : formatCurrency(Math.abs(saved))}
+          {loading ? (
+            <span className="skeleton month-card-skeleton" />
+          ) : (
+            <strong className="month-card-value">
+              {formatCurrency(previous.total)}
+            </strong>
+          )}
 
-            {trend === "saved" || trend === "more" ? (
-              <span className="month-card-badge">
-                <span aria-hidden="true">{trend === "saved" ? "↓" : "↑"}</span>{" "}
-                {savedPercent}%
-              </span>
-            ) : null}
-          </strong>
-        )}
+          <span className="month-card-note">
+            {previous.count} {previous.count === 1 ? "bill" : "bills"}
+          </span>
+        </div>
 
-        {!loading && trend !== "none" && (
-          <div
-            className="month-card-meter"
-            title={`${Math.round(usedOfLastMonth)}% of last month's total`}>
-            <span style={{ width: `${Math.min(usedOfLastMonth, 100)}%` }} />
-          </div>
-        )}
+        <div
+          className={`month-card month-card-savings ${loading ? "" : trend}`}
+        >
+          <span className="month-card-label">
+            {trend === "more"
+              ? "Spending more than last month"
+              : trend === "saved"
+                ? "Spending less than last month"
+                : "Difference from last month"}
+          </span>
 
-        <span className="month-card-note">
-          {loading
-            ? "Comparing months..."
-            : trend === "none"
-              ? "No bills last month to compare with."
-              : trend === "same"
-                ? "Exactly the same as last month."
-                : `${Math.round(usedOfLastMonth)}% of last month's total so far.`}
-        </span>
+          {loading ? (
+            <span className="skeleton month-card-skeleton" />
+          ) : (
+            <strong className="month-card-value">
+              {trend === "none" ? "—" : formatCurrency(Math.abs(saved))}
+
+              {trend === "saved" || trend === "more" ? (
+                <span className="month-card-badge">
+                  <span aria-hidden="true">
+                    {trend === "saved" ? "↓" : "↑"}
+                  </span>{" "}
+                  {savedPercent}%
+                </span>
+              ) : null}
+            </strong>
+          )}
+
+          {!loading && trend !== "none" && (
+            <div
+              className="month-card-meter"
+              title={`${Math.round(usedOfLastMonth)}% of last month's total`}
+            >
+              <span style={{ width: `${Math.min(usedOfLastMonth, 100)}%` }} />
+            </div>
+          )}
+
+          <span className="month-card-note">
+            {loading
+              ? "Comparing months..."
+              : trend === "none"
+                ? "No bills last month to compare with."
+                : trend === "same"
+                  ? "Exactly the same as last month."
+                  : `So far you've spent ${Math.round(usedOfLastMonth)}% of what you spent on bills last month.`}
+          </span>
+        </div>
       </div>
     </section>
   );
